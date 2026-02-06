@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracker Hub - Gestão de Stock</title>
+    <!-- Tailwind CSS para o design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .sidebar-btn.active { background-color: #2563eb; color: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col md:flex-row">
+
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-400 flex flex-col shadow-2xl">
+        <div class="p-6 border-b border-slate-800 flex items-center gap-3">
+            <i data-lucide="truck" class="text-blue-500"></i>
+            <h1 class="text-white font-black text-xl tracking-tighter">TRACKER HUB</h1>
+        </div>
+        <nav class="p-4 flex-1 space-y-1">
+            <button onclick="showTab('dashboard')" id="btn-dashboard" class="sidebar-btn active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white">
+                <i data-lucide="layout-dashboard" size="18"></i> Dashboard
+            </button>
+            <button onclick="showTab('movements')" id="btn-movements" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white">
+                <i data-lucide="arrow-right-left" size="18"></i> Movimentar
+            </button>
+            <button onclick="showTab('new')" id="btn-new" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white">
+                <i data-lucide="plus-circle" size="18"></i> Novo Cadastro
+            </button>
+            <button onclick="showTab('history')" id="btn-history" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white">
+                <i data-lucide="list-checks" size="18"></i> Histórico
+            </button>
+        </nav>
+        <div id="user-info" class="p-4 text-[10px] text-slate-600 border-t border-slate-800 uppercase tracking-widest">
+            Iniciando...
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+        <header class="flex justify-between items-center mb-8">
+            <h2 id="page-title" class="text-2xl font-black text-slate-800 uppercase tracking-tight">Status do Estoque</h2>
+            <div class="flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-slate-200 shadow-sm">
+                <div id="connection-status-dot" class="status-dot bg-slate-300"></div>
+                <span id="connection-status-text" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Conectando...</span>
+            </div>
+        </header>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="tab-content active space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-500">
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Remanufatura</p>
+                    <h3 id="stat-reman" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-amber-500">
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Equip. Retorno</p>
+                    <h3 id="stat-retorno" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-red-500">
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Abaixo do Mínimo</p>
+                    <h3 id="stat-alerta" class="text-3xl font-black text-red-600 mt-1">0</h3>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="p-4 font-bold text-slate-600">Material</th>
+                            <th class="p-4 text-center text-emerald-600">Pronto</th>
+                            <th class="p-4 text-center text-blue-600">Reman</th>
+                            <th class="p-4 text-center text-amber-600">Retorno</th>
+                            <th class="p-4 text-center text-slate-400">Mínimo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-table-body" class="divide-y divide-slate-100">
+                        <tr><td colspan="5" class="p-10 text-center text-slate-400 italic">Buscando dados no Cloud Firestore...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Movimentação -->
+        <div id="movements" class="tab-content max-w-2xl mx-auto space-y-6">
+            <div class="bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
+                <div class="grid grid-cols-1 gap-4 mb-6">
+                    <label class="text-xs font-bold text-slate-400 uppercase">Produto Selecionado</label>
+                    <select id="trans-item" class="p-3 border-2 border-slate-100 rounded-lg bg-slate-50 font-bold outline-none focus:border-blue-500">
+                        <option value="">Aguardando itens...</option>
+                    </select>
+                    
+                    <div class="flex gap-2 p-1 bg-slate-100 rounded-xl mt-2">
+                        <button onclick="setTransType('in')" id="type-in" class="type-btn flex-1 py-3 rounded-lg font-black text-xs transition-all bg-white text-emerald-600 shadow-md uppercase">Entrada</button>
+                        <button onclick="setTransType('out')" id="type-out" class="type-btn flex-1 py-3 rounded-lg font-black text-xs transition-all text-slate-500 uppercase">Saída</button>
+                        <button onclick="setTransType('transfer')" id="type-transfer" class="type-btn flex-1 py-3 rounded-lg font-black text-xs transition-all text-slate-500 uppercase">Transferência</button>
+                    </div>
+                </div>
+
+                <div id="transfer-options" class="hidden grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-slate-400">Origem</label>
+                        <select id="trans-from" class="w-full p-3 border rounded-lg text-sm bg-slate-50">
+                            <option value="stockPronto">Pronto Uso</option>
+                            <option value="stockReman">Remanufatura</option>
+                            <option value="stockRetorno">Retorno</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-slate-400">Destino</label>
+                        <select id="trans-to" class="w-full p-3 border rounded-lg text-sm bg-slate-50">
+                            <option value="stockPronto">Pronto Uso</option>
+                            <option value="stockReman">Remanufatura</option>
+                            <option value="stockRetorno">Retorno</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" id="trans-qty" placeholder="Quantidade" value="1" min="1" class="p-3 border-2 border-slate-100 rounded-lg outline-none focus:border-blue-500">
+                    <input type="text" id="trans-reason" placeholder="Obs / Placa / OS" class="p-3 border-2 border-slate-100 rounded-lg outline-none focus:border-blue-500">
+                </div>
+                <button onclick="handleTransaction()" class="w-full py-4 bg-blue-600 text-white rounded-lg font-black uppercase tracking-widest mt-6 hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-200">Confirmar Operação</button>
+            </div>
+        </div>
+
+        <!-- Novo Equipamento -->
+        <div id="new" class="tab-content max-w-lg mx-auto">
+            <div class="bg-white p-8 rounded-xl border border-slate-200 shadow-sm space-y-6">
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase">Descrição do Equipamento</label>
+                    <input type="text" id="new-name" placeholder="Ex: Suntech ST310U" class="w-full p-4 border-2 border-slate-100 rounded-xl outline-none font-bold focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Estoque Mínimo</label>
+                        <input type="number" id="new-min" value="5" class="w-full p-4 border-2 border-slate-100 rounded-xl">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Estoque Máximo</label>
+                        <input type="number" id="new-max" value="20" class="w-full p-4 border-2 border-slate-100 rounded-xl">
+                    </div>
+                </div>
+                <button onclick="addNewItem()" class="w-full py-4 bg-blue-600 text-white rounded-lg font-black uppercase tracking-widest hover:bg-blue-700 transition-all">Salvar no Inventário</button>
+            </div>
+        </div>
+
+        <!-- Histórico -->
+        <div id="history" class="tab-content">
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xl">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-900 border-b border-slate-800">
+                        <tr class="text-[10px] uppercase text-slate-500 font-bold">
+                            <th class="p-4">Data e Hora</th>
+                            <th class="p-4">Tipo</th>
+                            <th class="p-4">Equipamento</th>
+                            <th class="p-4 text-center">Qtd</th>
+                            <th class="p-4">Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body" class="divide-y divide-slate-100">
+                        <tr><td colspan="5" class="p-10 text-center text-slate-400">Aguardando registros...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, updateDoc, doc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyATO-PdFidpnuPrPMq36oKTDFlpSxbsxDA",
+            authDomain: "meuestoquerastreadores.firebaseapp.com",
+            projectId: "meuestoquerastreadores",
+            storageBucket: "meuestoquerastreadores.firebasestorage.app",
+            messagingSenderId: "808134691039",
+            appId: "1:808134691039:web:c7af29edeea9b3e202016a",
+            measurementId: "G-1EYY1DYQXR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        const appId = 'rastreadores-main-db';
+
+        let currentInventory = [];
+        let currentTransactionType = 'in';
+        let currentUser = null;
+
+        const updateStatus = (text, color) => {
+            const dot = document.getElementById('connection-status-dot');
+            if(dot) dot.className = `status-dot ${color}`;
+            const label = document.getElementById('connection-status-text');
+            if(label) label.innerText = text;
+        };
+
+        const initSession = async () => {
+            try {
+                await signInAnonymously(auth);
+            } catch (err) {
+                console.error("Erro Auth:", err);
+                updateStatus("Erro Acesso", "bg-red-500");
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('user-info').innerText = `ID: ${user.uid.substring(0,6)} (Online)`;
+                updateStatus("Sincronizado", "bg-emerald-500");
+                startListening();
+            }
+        });
+
+        function startListening() {
+            const invRef = collection(db, 'artifacts', appId, 'public', 'data', 'inventory');
+            const histRef = collection(db, 'artifacts', appId, 'public', 'data', 'history');
+
+            onSnapshot(invRef, (snap) => {
+                currentInventory = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderInventory();
+                updateSelects();
+                updateStats();
+            }, (err) => {
+                console.error("Firestore Error:", err);
+                if(err.code === 'permission-denied') updateStatus("Sem Permissão", "bg-red-500");
+            });
+
+            onSnapshot(histRef, (snap) => {
+                const logs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                                 .sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                renderHistory(logs);
+            });
+        }
+
+        function renderInventory() {
+            const body = document.getElementById('inventory-table-body');
+            if(!body) return;
+            body.innerHTML = currentInventory.length === 0 ? 
+                `<tr><td colspan="5" class="p-10 text-center text-slate-400">Clique em "Novo Cadastro" para começar.</td></tr>` :
+                currentInventory.map(item => {
+                    const low = (item.stockPronto || 0) <= (item.minStock || 0);
+                    return `
+                        <tr class="hover:bg-slate-50 border-b border-slate-50">
+                            <td class="p-4 font-bold text-slate-700">${item.name}</td>
+                            <td class="p-4 text-center font-black ${low ? 'text-red-500 bg-red-50' : 'text-emerald-600'}">${item.stockPronto || 0}</td>
+                            <td class="p-4 text-center font-bold text-blue-500">${item.stockReman || 0}</td>
+                            <td class="p-4 text-center font-bold text-amber-500">${item.stockRetorno || 0}</td>
+                            <td class="p-4 text-center text-slate-400 text-xs">${item.minStock}</td>
+                        </tr>
+                    `;
+                }).join('');
+        }
+
+        function renderHistory(logs) {
+            const body = document.getElementById('history-table-body');
+            if(!body) return;
+            body.innerHTML = logs.slice(0, 15).map(h => `
+                <tr class="text-xs">
+                    <td class="p-4 text-slate-400">${h.date || 'Processando...'}</td>
+                    <td class="p-4 font-black ${h.action === 'Entrada' ? 'text-emerald-500' : (h.action === 'Saída' ? 'text-red-500' : 'text-blue-500')} uppercase">${h.action}</td>
+                    <td class="p-4 font-bold">${h.item}</td>
+                    <td class="p-4 text-center font-black">${h.qty}</td>
+                    <td class="p-4 text-slate-500">${h.detail || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function updateSelects() {
+            const select = document.getElementById('trans-item');
+            if(!select) return;
+            const current = select.value;
+            select.innerHTML = '<option value="">Escolha o equipamento...</option>' + 
+                currentInventory.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+            select.value = current;
+        }
+
+        function updateStats() {
+            const reman = currentInventory.reduce((a,c) => a + (c.stockReman || 0), 0);
+            const retorno = currentInventory.reduce((a,c) => a + (c.stockRetorno || 0), 0);
+            const alertas = currentInventory.filter(i => (i.stockPronto || 0) <= (i.minStock || 0)).length;
+            
+            if(document.getElementById('stat-reman')) document.getElementById('stat-reman').innerText = reman;
+            if(document.getElementById('stat-retorno')) document.getElementById('stat-retorno').innerText = retorno;
+            if(document.getElementById('stat-alerta')) document.getElementById('stat-alerta').innerText = alertas;
+        }
+
+        window.setTransType = (type) => {
+            currentTransactionType = type;
+            document.querySelectorAll('.type-btn').forEach(b => {
+                b.classList.remove('bg-white', 'shadow-md', 'text-emerald-600', 'text-red-600', 'text-blue-600');
+                b.classList.add('text-slate-500');
+            });
+            const btn = document.getElementById(`type-${type}`);
+            const colors = { in: 'text-emerald-600', out: 'text-red-600', transfer: 'text-blue-600' };
+            if(btn) {
+                btn.classList.add('bg-white', 'shadow-md', colors[type]);
+                btn.classList.remove('text-slate-500');
+            }
+            const opts = document.getElementById('transfer-options');
+            if(opts) opts.classList.toggle('hidden', type !== 'transfer');
+        };
+
+        window.addNewItem = async () => {
+            const name = document.getElementById('new-name').value;
+            const min = parseInt(document.getElementById('new-min').value) || 0;
+            const max = parseInt(document.getElementById('new-max').value) || 0;
+            
+            if(!name || !currentUser) return;
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'inventory'), {
+                    name, minStock: min, maxStock: max,
+                    stockPronto: 0, stockReman: 0, stockRetorno: 0,
+                    timestamp: serverTimestamp()
+                });
+                document.getElementById('new-name').value = '';
+                showTab('dashboard');
+            } catch(e) { 
+                console.error(e);
+                alert("Erro ao gravar. Verifique se as Regras foram publicadas."); 
+            }
+        };
+
+        window.handleTransaction = async () => {
+            const id = document.getElementById('trans-item').value;
+            const qty = parseInt(document.getElementById('trans-qty').value);
+            const reason = document.getElementById('trans-reason').value;
+            if(!id || isNaN(qty) || qty <= 0 || !currentUser) return;
+
+            const item = currentInventory.find(i => i.id === id);
+            const data = { ...item }; delete data.id;
+
+            if(currentTransactionType === 'in') data.stockPronto += qty;
+            else if(currentTransactionType === 'out') {
+                if(data.stockPronto < qty) return alert("Stock Pronto insuficiente!");
+                data.stockPronto -= qty;
+            } else {
+                const from = document.getElementById('trans-from').value;
+                const to = document.getElementById('trans-to').value;
+                if(from === to) return alert("Origem e Destino devem ser diferentes.");
+                if(data[from] < qty) return alert("Saldo insuficiente na origem!");
+                data[from] -= qty;
+                data[to] += qty;
+            }
+
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), data);
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
+                    item: item.name, 
+                    action: currentTransactionType === 'in' ? 'Entrada' : (currentTransactionType === 'out' ? 'Saída' : 'Transferência'),
+                    qty, 
+                    detail: reason, 
+                    date: new Date().toLocaleString('pt-PT'), 
+                    timestamp: serverTimestamp()
+                });
+                showTab('dashboard');
+            } catch(e) { alert("Erro ao atualizar base de dados."); }
+        };
+
+        window.showTab = (id) => {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+            const target = document.getElementById(id);
+            if(target) target.classList.add('active');
+            const btn = document.getElementById(`btn-${id}`);
+            if(btn) btn.classList.add('active');
+            lucide.createIcons();
+        };
+
+        initSession();
+        lucide.createIcons();
+    </script>
+</body>
+</html>
