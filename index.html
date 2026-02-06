@@ -66,7 +66,7 @@
                     <h3 id="stat-retorno" class="text-3xl font-black text-slate-800 mt-1">0</h3>
                 </div>
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-red-500">
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Abaixo do Mínimo</p>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Total Baixo (Mínimo)</p>
                     <h3 id="stat-alerta" class="text-3xl font-black text-red-600 mt-1">0</h3>
                 </div>
             </div>
@@ -76,7 +76,8 @@
                     <thead class="bg-slate-50 border-b border-slate-200">
                         <tr>
                             <th class="p-4 font-bold text-slate-600">Material</th>
-                            <th class="p-4 text-center text-slate-600">Status</th>
+                            <th class="p-4 text-center text-slate-600">Status Geral</th>
+                            <th class="p-4 text-center text-slate-900 bg-slate-100 font-black">Total</th>
                             <th class="p-4 text-center text-emerald-600">Pronto</th>
                             <th class="p-4 text-center text-blue-600">Reman</th>
                             <th class="p-4 text-center text-amber-600">Retorno</th>
@@ -85,7 +86,7 @@
                         </tr>
                     </thead>
                     <tbody id="inventory-table-body" class="divide-y divide-slate-100">
-                        <tr><td colspan="7" class="p-10 text-center text-slate-400 italic">Buscando dados no Cloud Firestore...</td></tr>
+                        <tr><td colspan="8" class="p-10 text-center text-slate-400 italic">Sincronizando...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -252,19 +253,24 @@
             const body = document.getElementById('inventory-table-body');
             if(!body) return;
             body.innerHTML = currentInventory.length === 0 ? 
-                `<tr><td colspan="7" class="p-10 text-center text-slate-400">Clique em "Novo Cadastro" para começar.</td></tr>` :
+                `<tr><td colspan="8" class="p-10 text-center text-slate-400">Vazio. Adicione itens em "Novo Cadastro".</td></tr>` :
                 currentInventory.map(item => {
                     const pronto = item.stockPronto || 0;
+                    const reman = item.stockReman || 0;
+                    const retorno = item.stockRetorno || 0;
+                    const total = pronto + reman + retorno;
+                    
                     const min = item.minStock || 0;
-                    const max = item.maxStock || Infinity;
+                    const max = item.maxStock || 100;
 
                     let statusLabel = "";
                     let statusClasses = "";
 
-                    if (pronto < min) {
+                    // Lógica baseada no TOTAL (Pronto + Reman + Retorno)
+                    if (total < min) {
                         statusLabel = "Estoque Baixo";
                         statusClasses = "bg-red-100 text-red-700 border-red-200";
-                    } else if (pronto > max) {
+                    } else if (total > max) {
                         statusLabel = "Estoque Excedente";
                         statusClasses = "bg-emerald-100 text-emerald-700 border-emerald-200";
                     } else {
@@ -273,16 +279,17 @@
                     }
 
                     return `
-                        <tr class="hover:bg-slate-50 border-b border-slate-50">
+                        <tr class="hover:bg-slate-50 border-b border-slate-50 transition-colors">
                             <td class="p-4 font-bold text-slate-700">${item.name}</td>
                             <td class="p-4 text-center">
-                                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase border ${statusClasses}">
+                                <span class="px-2 py-1 rounded-full text-[10px] font-black uppercase border ${statusClasses}">
                                     ${statusLabel}
                                 </span>
                             </td>
-                            <td class="p-4 text-center font-black ${pronto < min ? 'text-red-500 bg-red-50' : 'text-slate-800'}">${pronto}</td>
-                            <td class="p-4 text-center font-bold text-blue-500">${item.stockReman || 0}</td>
-                            <td class="p-4 text-center font-bold text-amber-500">${item.stockRetorno || 0}</td>
+                            <td class="p-4 text-center font-black bg-slate-50 text-slate-900 text-base">${total}</td>
+                            <td class="p-4 text-center font-bold text-emerald-600">${pronto}</td>
+                            <td class="p-4 text-center font-bold text-blue-500">${reman}</td>
+                            <td class="p-4 text-center font-bold text-amber-500">${retorno}</td>
                             <td class="p-4 text-center text-slate-400 text-[10px] font-mono">${min} / ${item.maxStock || '-'}</td>
                             <td class="p-4 text-center">
                                 <button onclick="deleteMaterial('${item.id}', '${item.name}')" class="text-slate-300 hover:text-red-500 transition-colors p-1" title="Excluir Material">
@@ -321,7 +328,12 @@
         function updateStats() {
             const reman = currentInventory.reduce((a,c) => a + (c.stockReman || 0), 0);
             const retorno = currentInventory.reduce((a,c) => a + (c.stockRetorno || 0), 0);
-            const alertas = currentInventory.filter(i => (i.stockPronto || 0) < (i.minStock || 0)).length;
+            
+            // Alertas agora contam quantos itens estão com TOTAL abaixo do mínimo
+            const alertas = currentInventory.filter(i => {
+                const total = (i.stockPronto || 0) + (i.stockReman || 0) + (i.stockRetorno || 0);
+                return total < (i.minStock || 0);
+            }).length;
             
             if(document.getElementById('stat-reman')) document.getElementById('stat-reman').innerText = reman;
             if(document.getElementById('stat-retorno')) document.getElementById('stat-retorno').innerText = retorno;
@@ -360,30 +372,20 @@
                 showTab('dashboard');
             } catch(e) { 
                 console.error(e);
-                alert("Erro ao gravar. Verifique se as Regras foram publicadas."); 
+                alert("Erro ao gravar."); 
             }
         };
 
         window.deleteMaterial = async (id, name) => {
             if(!currentUser) return;
-            const confirmed = window.confirm(`Tem certeza que deseja excluir o material "${name}" permanentemente? Todos os saldos atuais serão perdidos.`);
-            
+            const confirmed = window.confirm(`Excluir permanentemente "${name}"?`);
             if(confirmed) {
                 try {
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id));
-                    
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
-                        item: name, 
-                        action: 'Exclusão',
-                        qty: 0, 
-                        detail: 'Material removido do sistema', 
-                        date: new Date().toLocaleString('pt-PT'), 
-                        timestamp: serverTimestamp()
+                        item: name, action: 'Exclusão', qty: 0, detail: 'Removido', date: new Date().toLocaleString('pt-PT'), timestamp: serverTimestamp()
                     });
-                } catch(e) {
-                    console.error("Erro ao deletar:", e);
-                    alert("Erro ao excluir material da base de dados.");
-                }
+                } catch(e) { alert("Erro ao excluir."); }
             }
         };
 
@@ -398,12 +400,12 @@
 
             if(currentTransactionType === 'in') data.stockPronto += qty;
             else if(currentTransactionType === 'out') {
-                if(data.stockPronto < qty) return alert("Stock Pronto insuficiente!");
+                if(data.stockPronto < qty) return alert("Pronto Uso insuficiente!");
                 data.stockPronto -= qty;
             } else {
                 const from = document.getElementById('trans-from').value;
                 const to = document.getElementById('trans-to').value;
-                if(from === to) return alert("Origem e Destino devem ser diferentes.");
+                if(from === to) return alert("Origem e Destino iguais.");
                 if(data[from] < qty) return alert("Saldo insuficiente na origem!");
                 data[from] -= qty;
                 data[to] += qty;
@@ -414,13 +416,10 @@
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
                     item: item.name, 
                     action: currentTransactionType === 'in' ? 'Entrada' : (currentTransactionType === 'out' ? 'Saída' : 'Transferência'),
-                    qty, 
-                    detail: reason, 
-                    date: new Date().toLocaleString('pt-PT'), 
-                    timestamp: serverTimestamp()
+                    qty, detail: reason, date: new Date().toLocaleString('pt-PT'), timestamp: serverTimestamp()
                 });
                 showTab('dashboard');
-            } catch(e) { alert("Erro ao atualizar base de dados."); }
+            } catch(e) { alert("Erro ao atualizar."); }
         };
 
         window.showTab = (id) => {
