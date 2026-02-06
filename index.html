@@ -76,14 +76,16 @@
                     <thead class="bg-slate-50 border-b border-slate-200">
                         <tr>
                             <th class="p-4 font-bold text-slate-600">Material</th>
+                            <th class="p-4 text-center text-slate-600">Status</th>
                             <th class="p-4 text-center text-emerald-600">Pronto</th>
                             <th class="p-4 text-center text-blue-600">Reman</th>
                             <th class="p-4 text-center text-amber-600">Retorno</th>
-                            <th class="p-4 text-center text-slate-400">Mínimo</th>
+                            <th class="p-4 text-center text-slate-400">Limites (Min/Max)</th>
+                            <th class="p-4 text-center text-slate-400">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="inventory-table-body" class="divide-y divide-slate-100">
-                        <tr><td colspan="5" class="p-10 text-center text-slate-400 italic">Buscando dados no Cloud Firestore...</td></tr>
+                        <tr><td colspan="7" class="p-10 text-center text-slate-400 italic">Buscando dados no Cloud Firestore...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -178,7 +180,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, updateDoc, doc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyATO-PdFidpnuPrPMq36oKTDFlpSxbsxDA",
@@ -250,19 +252,47 @@
             const body = document.getElementById('inventory-table-body');
             if(!body) return;
             body.innerHTML = currentInventory.length === 0 ? 
-                `<tr><td colspan="5" class="p-10 text-center text-slate-400">Clique em "Novo Cadastro" para começar.</td></tr>` :
+                `<tr><td colspan="7" class="p-10 text-center text-slate-400">Clique em "Novo Cadastro" para começar.</td></tr>` :
                 currentInventory.map(item => {
-                    const low = (item.stockPronto || 0) <= (item.minStock || 0);
+                    const pronto = item.stockPronto || 0;
+                    const min = item.minStock || 0;
+                    const max = item.maxStock || Infinity;
+
+                    let statusLabel = "";
+                    let statusClasses = "";
+
+                    if (pronto < min) {
+                        statusLabel = "Estoque Baixo";
+                        statusClasses = "bg-red-100 text-red-700 border-red-200";
+                    } else if (pronto > max) {
+                        statusLabel = "Estoque Excedente";
+                        statusClasses = "bg-emerald-100 text-emerald-700 border-emerald-200";
+                    } else {
+                        statusLabel = "Estoque Controlado";
+                        statusClasses = "bg-amber-100 text-amber-700 border-amber-200";
+                    }
+
                     return `
                         <tr class="hover:bg-slate-50 border-b border-slate-50">
                             <td class="p-4 font-bold text-slate-700">${item.name}</td>
-                            <td class="p-4 text-center font-black ${low ? 'text-red-500 bg-red-50' : 'text-emerald-600'}">${item.stockPronto || 0}</td>
+                            <td class="p-4 text-center">
+                                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase border ${statusClasses}">
+                                    ${statusLabel}
+                                </span>
+                            </td>
+                            <td class="p-4 text-center font-black ${pronto < min ? 'text-red-500 bg-red-50' : 'text-slate-800'}">${pronto}</td>
                             <td class="p-4 text-center font-bold text-blue-500">${item.stockReman || 0}</td>
                             <td class="p-4 text-center font-bold text-amber-500">${item.stockRetorno || 0}</td>
-                            <td class="p-4 text-center text-slate-400 text-xs">${item.minStock}</td>
+                            <td class="p-4 text-center text-slate-400 text-[10px] font-mono">${min} / ${item.maxStock || '-'}</td>
+                            <td class="p-4 text-center">
+                                <button onclick="deleteMaterial('${item.id}', '${item.name}')" class="text-slate-300 hover:text-red-500 transition-colors p-1" title="Excluir Material">
+                                    <i data-lucide="trash-2" size="16"></i>
+                                </button>
+                            </td>
                         </tr>
                     `;
                 }).join('');
+            lucide.createIcons();
         }
 
         function renderHistory(logs) {
@@ -271,9 +301,9 @@
             body.innerHTML = logs.slice(0, 15).map(h => `
                 <tr class="text-xs">
                     <td class="p-4 text-slate-400">${h.date || 'Processando...'}</td>
-                    <td class="p-4 font-black ${h.action === 'Entrada' ? 'text-emerald-500' : (h.action === 'Saída' ? 'text-red-500' : 'text-blue-500')} uppercase">${h.action}</td>
+                    <td class="p-4 font-black ${h.action === 'Entrada' ? 'text-emerald-500' : (h.action === 'Saída' ? 'text-red-500' : (h.action === 'Exclusão' ? 'text-red-800' : 'text-blue-500'))} uppercase">${h.action}</td>
                     <td class="p-4 font-bold">${h.item}</td>
-                    <td class="p-4 text-center font-black">${h.qty}</td>
+                    <td class="p-4 text-center font-black">${h.qty || '-'}</td>
                     <td class="p-4 text-slate-500">${h.detail || '-'}</td>
                 </tr>
             `).join('');
@@ -291,7 +321,7 @@
         function updateStats() {
             const reman = currentInventory.reduce((a,c) => a + (c.stockReman || 0), 0);
             const retorno = currentInventory.reduce((a,c) => a + (c.stockRetorno || 0), 0);
-            const alertas = currentInventory.filter(i => (i.stockPronto || 0) <= (i.minStock || 0)).length;
+            const alertas = currentInventory.filter(i => (i.stockPronto || 0) < (i.minStock || 0)).length;
             
             if(document.getElementById('stat-reman')) document.getElementById('stat-reman').innerText = reman;
             if(document.getElementById('stat-retorno')) document.getElementById('stat-retorno').innerText = retorno;
@@ -331,6 +361,29 @@
             } catch(e) { 
                 console.error(e);
                 alert("Erro ao gravar. Verifique se as Regras foram publicadas."); 
+            }
+        };
+
+        window.deleteMaterial = async (id, name) => {
+            if(!currentUser) return;
+            const confirmed = window.confirm(`Tem certeza que deseja excluir o material "${name}" permanentemente? Todos os saldos atuais serão perdidos.`);
+            
+            if(confirmed) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id));
+                    
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
+                        item: name, 
+                        action: 'Exclusão',
+                        qty: 0, 
+                        detail: 'Material removido do sistema', 
+                        date: new Date().toLocaleString('pt-PT'), 
+                        timestamp: serverTimestamp()
+                    });
+                } catch(e) {
+                    console.error("Erro ao deletar:", e);
+                    alert("Erro ao excluir material da base de dados.");
+                }
             }
         };
 
