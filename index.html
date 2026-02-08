@@ -15,7 +15,6 @@
         .tab-content.active { display: block; }
         .sidebar-btn.active { background-color: #2563eb; color: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        /* Animação suave para o modal */
         #edit-modal { transition: opacity 0.2s ease-in-out; }
     </style>
 </head>
@@ -78,6 +77,7 @@
                     <thead class="bg-slate-50 border-b border-slate-200">
                         <tr>
                             <th class="p-4 font-bold text-slate-600">Material</th>
+                            <th class="p-4 text-center text-slate-600">Tipo</th>
                             <th class="p-4 text-center text-slate-600">Status Geral</th>
                             <th class="p-4 text-center text-slate-900 bg-slate-100 font-black">Total</th>
                             <th class="p-4 text-center text-emerald-600">Pronto</th>
@@ -88,7 +88,7 @@
                         </tr>
                     </thead>
                     <tbody id="inventory-table-body" class="divide-y divide-slate-100">
-                        <tr><td colspan="8" class="p-10 text-center text-slate-400 italic">Sincronizando...</td></tr>
+                        <tr><td colspan="9" class="p-10 text-center text-slate-400 italic">Sincronizando...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -144,6 +144,17 @@
                     <label class="text-xs font-bold text-slate-400 uppercase">Descrição do Equipamento</label>
                     <input type="text" id="new-name" placeholder="Ex: Suntech ST310U" class="w-full p-4 border-2 border-slate-100 rounded-xl outline-none font-bold focus:border-blue-500">
                 </div>
+                
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase">Tipo de Material</label>
+                    <select id="new-type" class="w-full p-4 border-2 border-slate-100 rounded-xl outline-none font-bold focus:border-blue-500 bg-white">
+                        <option value="Insumo">Insumo</option>
+                        <option value="Ferramenta">Ferramenta</option>
+                        <option value="Locação">Locação</option>
+                        <option value="Cartão">Cartão</option>
+                    </select>
+                </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="text-[10px] font-bold text-slate-400 uppercase">Estoque Mínimo</label>
@@ -179,7 +190,7 @@
         </div>
     </main>
 
-    <!-- Modal de Edição (NOVO) -->
+    <!-- Modal de Edição -->
     <div id="edit-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div class="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
@@ -191,6 +202,15 @@
                 <div>
                     <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Nome</label>
                     <input id="edit-name" type="text" class="w-full p-3 border-2 border-slate-100 rounded-lg font-bold outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Tipo de Material</label>
+                    <select id="edit-type" class="w-full p-3 border-2 border-slate-100 rounded-lg font-bold outline-none focus:border-blue-500 bg-white">
+                        <option value="Insumo">Insumo</option>
+                        <option value="Ferramenta">Ferramenta</option>
+                        <option value="Locação">Locação</option>
+                        <option value="Cartão">Cartão</option>
+                    </select>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -286,7 +306,7 @@
             const body = document.getElementById('inventory-table-body');
             if(!body) return;
             body.innerHTML = currentInventory.length === 0 ? 
-                `<tr><td colspan="8" class="p-10 text-center text-slate-400">Vazio. Adicione itens em "Novo Cadastro".</td></tr>` :
+                `<tr><td colspan="9" class="p-10 text-center text-slate-400">Vazio. Adicione itens em "Novo Cadastro".</td></tr>` :
                 currentInventory.map(item => {
                     const pronto = item.stockPronto || 0;
                     const reman = item.stockReman || 0;
@@ -295,6 +315,7 @@
                     
                     const min = item.minStock || 0;
                     const max = item.maxStock || 100;
+                    const type = item.type || 'Insumo';
 
                     let statusLabel = "";
                     let statusClasses = "";
@@ -310,9 +331,21 @@
                         statusClasses = "bg-amber-100 text-amber-700 border-amber-200";
                     }
 
+                    // Cores para os tipos
+                    let typeClass = "bg-slate-100 text-slate-600";
+                    if(type === 'Insumo') typeClass = "bg-blue-50 text-blue-600 border-blue-100";
+                    if(type === 'Ferramenta') typeClass = "bg-orange-50 text-orange-600 border-orange-100";
+                    if(type === 'Locação') typeClass = "bg-purple-50 text-purple-600 border-purple-100";
+                    if(type === 'Cartão') typeClass = "bg-pink-50 text-pink-600 border-pink-100";
+
                     return `
                         <tr class="hover:bg-slate-50 border-b border-slate-50 transition-colors">
                             <td class="p-4 font-bold text-slate-700">${item.name}</td>
+                            <td class="p-4 text-center">
+                                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase border ${typeClass}">
+                                    ${type}
+                                </span>
+                            </td>
                             <td class="p-4 text-center">
                                 <span class="px-2 py-1 rounded-full text-[10px] font-black uppercase border ${statusClasses}">
                                     ${statusLabel}
@@ -324,10 +357,10 @@
                             <td class="p-4 text-center font-bold text-amber-500">${retorno}</td>
                             <td class="p-4 text-center text-slate-400 text-[10px] font-mono">${min} / ${item.maxStock || '-'}</td>
                             <td class="p-4 text-center flex items-center justify-center gap-2">
-                                <button onclick="openEditModal('${item.id}', '${item.name}', ${min}, ${item.maxStock || 0})" class="text-slate-300 hover:text-blue-500 transition-colors p-1" title="Editar Limites">
+                                <button onclick="openEditModal('${item.id}', '${item.name}', ${min}, ${item.maxStock || 0}, '${type}')" class="text-slate-300 hover:text-blue-500 transition-colors p-1" title="Editar">
                                     <i data-lucide="pencil" size="16"></i>
                                 </button>
-                                <button onclick="deleteMaterial('${item.id}', '${item.name}')" class="text-slate-300 hover:text-red-500 transition-colors p-1" title="Excluir Material">
+                                <button onclick="deleteMaterial('${item.id}', '${item.name}')" class="text-slate-300 hover:text-red-500 transition-colors p-1" title="Excluir">
                                     <i data-lucide="trash-2" size="16"></i>
                                 </button>
                             </td>
@@ -373,12 +406,16 @@
             if(document.getElementById('stat-alerta')) document.getElementById('stat-alerta').innerText = alertas;
         }
 
-        // Funções Globais (Edit e Delete)
-        window.openEditModal = (id, name, min, max) => {
+        // Funções Globais
+        window.openEditModal = (id, name, min, max, type) => {
             document.getElementById('edit-id').value = id;
             document.getElementById('edit-name').value = name;
             document.getElementById('edit-min').value = min;
             document.getElementById('edit-max').value = max;
+            // Define o tipo se existir, ou padrão Insumo
+            const typeSelect = document.getElementById('edit-type');
+            if(typeSelect) typeSelect.value = type || 'Insumo';
+            
             document.getElementById('edit-modal').classList.remove('hidden');
         };
 
@@ -391,12 +428,13 @@
             const name = document.getElementById('edit-name').value;
             const min = parseInt(document.getElementById('edit-min').value);
             const max = parseInt(document.getElementById('edit-max').value);
+            const type = document.getElementById('edit-type').value;
 
             if(!name || !currentUser) return;
 
             try {
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), {
-                    name, minStock: min, maxStock: max
+                    name, minStock: min, maxStock: max, type
                 });
                 closeEditModal();
             } catch(e) { alert("Erro ao editar."); }
@@ -422,11 +460,12 @@
             const name = document.getElementById('new-name').value;
             const min = parseInt(document.getElementById('new-min').value) || 0;
             const max = parseInt(document.getElementById('new-max').value) || 0;
+            const type = document.getElementById('new-type').value;
             
             if(!name || !currentUser) return;
             try {
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'inventory'), {
-                    name, minStock: min, maxStock: max,
+                    name, minStock: min, maxStock: max, type,
                     stockPronto: 0, stockReman: 0, stockRetorno: 0,
                     timestamp: serverTimestamp()
                 });
