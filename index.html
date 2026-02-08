@@ -12,18 +12,16 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animate: fade-in 0.3s; }
+        .tab-content.active { display: block; animation: fade-in 0.3s; }
         .sidebar-btn.active { background-color: #2563eb; color: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
         
-        /* Animações e Toast */
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
         .toast { animation: slideIn 0.3s ease-out forwards; }
         
-        /* Scrollbar customizada */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
@@ -39,7 +37,7 @@
     <aside class="w-full md:w-64 bg-slate-900 text-slate-400 flex flex-col shadow-2xl z-20">
         <div class="p-6 border-b border-slate-800 flex items-center gap-3">
             <i data-lucide="package-search" class="text-blue-500"></i>
-            <h1 class="text-white font-black text-xl tracking-tighter">Controle de Estoque</h1>
+            <h1 class="text-white font-black text-xl tracking-tighter">ESTOQUE SCM</h1>
         </div>
         <nav class="p-4 flex-1 space-y-1">
             <button onclick="showTab('dashboard')" id="btn-dashboard" class="sidebar-btn active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white">
@@ -62,11 +60,20 @@
 
     <!-- Main Content -->
     <main class="flex-1 p-4 md:p-8 overflow-y-auto relative h-screen">
-        <header class="flex justify-between items-center mb-8 sticky top-0 bg-slate-50/90 backdrop-blur-sm z-10 py-2">
+        <header class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8 sticky top-0 bg-slate-50/90 backdrop-blur-sm z-10 py-2">
             <h2 id="page-title" class="text-2xl font-black text-slate-800 uppercase tracking-tight">Visão Geral</h2>
-            <div class="flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-slate-200 shadow-sm">
-                <div id="connection-status-dot" class="status-dot bg-slate-300"></div>
-                <span id="connection-status-text" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Conectando...</span>
+            
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- Filtros de Busca -->
+                <div class="relative group">
+                    <i data-lucide="search" size="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors"></i>
+                    <input type="text" id="search-input" placeholder="Buscar por nome ou status..." oninput="handleFilter()" class="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-full text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-full md:w-64 transition-all shadow-sm">
+                </div>
+
+                <div class="flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-slate-200 shadow-sm">
+                    <div id="connection-status-dot" class="status-dot bg-slate-300"></div>
+                    <span id="connection-status-text" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Conectando...</span>
+                </div>
             </div>
         </header>
 
@@ -97,9 +104,9 @@
                                 <th class="p-4 text-center text-slate-600">Tipo</th>
                                 <th class="p-4 text-center text-slate-600">Status</th>
                                 <th class="p-4 text-center text-slate-900 bg-slate-100 font-black">Total</th>
-                                <th class="p-4 text-center text-emerald-600" title="Pronto Uso">Pronto</th>
-                                <th class="p-4 text-center text-blue-600" title="Remanufatura">Reman</th>
-                                <th class="p-4 text-center text-amber-600" title="Retorno">Retorno</th>
+                                <th class="p-4 text-center text-emerald-600">Pronto</th>
+                                <th class="p-4 text-center text-blue-600">Reman</th>
+                                <th class="p-4 text-center text-amber-600">Retorno</th>
                                 <th class="p-4 text-center text-slate-400">Min/Max</th>
                                 <th class="p-4 text-center text-slate-400">Ações</th>
                             </tr>
@@ -130,7 +137,6 @@
                     </div>
                 </div>
 
-                <!-- Área Dinâmica de Origem/Destino -->
                 <div id="dynamic-locations" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 hidden">
                     <div id="container-origin">
                         <label class="text-[10px] uppercase font-bold text-slate-400">Origem</label>
@@ -153,7 +159,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Quantidade</label>
-                        <input type="number" id="trans-qty" placeholder="1" value="" min="1" class="w-full p-3 border-2 border-slate-100 rounded-lg outline-none focus:border-blue-500">
+                        <input type="number" id="trans-qty" placeholder="1" min="1" class="w-full p-3 border-2 border-slate-100 rounded-lg outline-none focus:border-blue-500">
                     </div>
                     <div>
                         <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Observação</label>
@@ -179,7 +185,6 @@
                         <div id="new-preview-container" class="flex flex-col items-center justify-center text-slate-400 py-4">
                             <i data-lucide="upload-cloud" size="32" class="mb-2 group-hover:text-blue-500 transition-colors"></i>
                             <span class="text-xs font-bold uppercase group-hover:text-blue-600">Clique para enviar foto</span>
-                            <span class="text-[10px] mt-1 text-slate-300">Max: 1MB (Redimensionado auto.)</span>
                         </div>
                     </label>
                 </div>
@@ -245,7 +250,6 @@
             </div>
             <div class="p-6 space-y-4">
                 <input type="hidden" id="edit-id">
-                
                 <div class="space-y-1">
                     <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Imagem</label>
                     <div class="flex items-center gap-4">
@@ -253,14 +257,11 @@
                             <i data-lucide="image" class="text-slate-300"></i>
                         </div>
                         <label class="flex-1 cursor-pointer">
-                            <div class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 text-center transition-colors">
-                                Alterar Foto...
-                            </div>
+                            <div class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 text-center transition-colors">Alterar Foto...</div>
                             <input type="file" id="edit-image-file" accept="image/*" class="hidden" onchange="handleFileSelect(this, 'edit-current-img-container', true)">
                         </label>
                     </div>
                 </div>
-
                 <div>
                     <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Nome</label>
                     <input id="edit-name" type="text" class="w-full p-3 border-2 border-slate-100 rounded-lg font-bold outline-none focus:border-blue-500">
@@ -298,7 +299,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // CONFIGURAÇÃO DO FIREBASE (Automática para o Preview)
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyATO-PdFidpnuPrPMq36oKTDFlpSxbsxDA", 
             authDomain: "meuestoquerastreadores.firebaseapp.com",
@@ -311,34 +311,23 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'rastreadores-main-db';
 
         let currentInventory = [];
+        let filteredInventory = [];
         let currentUser = null;
         let currentTransactionType = 'in';
 
-        // --- SISTEMA DE NOTIFICAÇÕES (TOAST) ---
+        // Notificações
         window.showToast = (message, type = 'success') => {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            
             const colors = type === 'error' ? 'bg-red-500' : (type === 'info' ? 'bg-blue-500' : 'bg-emerald-500');
-            const icon = type === 'error' ? 'alert-circle' : 'check-circle';
-            
             toast.className = `${colors} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 toast mb-2 min-w-[300px] border border-white/10`;
-            toast.innerHTML = `
-                <i data-lucide="${icon}" size="20"></i>
-                <span class="font-bold text-sm">${message}</span>
-            `;
-            
+            toast.innerHTML = `<i data-lucide="${type === 'error' ? 'alert-circle' : 'check-circle'}" size="20"></i><span class="font-bold text-sm">${message}</span>`;
             container.appendChild(toast);
             lucide.createIcons();
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
         };
 
         const updateStatus = (text, color) => {
@@ -348,48 +337,31 @@
             if(label) label.innerText = text;
         };
 
-        const initSession = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.error("Erro Auth:", err);
-                updateStatus("Erro Acesso", "bg-red-500");
-                showToast("Erro de conexão com servidor", "error");
-            }
-        };
-
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 document.getElementById('user-info').innerText = `ID: ${user.uid.substring(0,6)} (Online)`;
                 updateStatus("Sincronizado", "bg-emerald-500");
                 startListening();
+            } else {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
             }
         });
 
         function startListening() {
-            if (!currentUser) return;
-            
             const invRef = collection(db, 'artifacts', appId, 'public', 'data', 'inventory');
-            const histRef = collection(db, 'artifacts', appId, 'public', 'data', 'history');
-
             onSnapshot(invRef, (snap) => {
                 currentInventory = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderInventory();
+                handleFilter(); // Inicializa com a lista filtrada (ou cheia)
                 updateSelects();
                 updateStats();
-            }, (err) => {
-                console.error("Firestore Error:", err);
-                if(err.code === 'permission-denied') {
-                    updateStatus("Sem Permissão", "bg-red-500");
-                    showToast("Sem permissão de acesso", "error");
-                }
             });
 
+            const histRef = collection(db, 'artifacts', appId, 'public', 'data', 'history');
             onSnapshot(histRef, (snap) => {
                 const logs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
                                  .sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
@@ -397,21 +369,42 @@
             });
         }
 
+        // --- FILTRAGEM ---
+        window.handleFilter = () => {
+            const term = document.getElementById('search-input').value.toLowerCase().trim();
+            
+            filteredInventory = currentInventory.filter(item => {
+                const total = (item.stockPronto || 0) + (item.stockReman || 0) + (item.stockRetorno || 0);
+                const min = item.minStock || 0;
+                const max = item.maxStock || 0;
+                
+                // Determina o texto do status para busca
+                let statusText = "";
+                if (total < min) statusText = "baixo";
+                else if (total > max) statusText = "excesso";
+                else statusText = "em controle";
+
+                return item.name.toLowerCase().includes(term) || 
+                       statusText.includes(term) ||
+                       (item.type && item.type.toLowerCase().includes(term));
+            });
+
+            renderInventory();
+        };
+
         function renderInventory() {
             const body = document.getElementById('inventory-table-body');
             if(!body) return;
-            body.innerHTML = currentInventory.length === 0 ? 
-                `<tr><td colspan="10" class="p-10 text-center text-slate-400">Nenhum item encontrado. Use "Novo Cadastro".</td></tr>` :
-                currentInventory.map(item => {
+            
+            body.innerHTML = filteredInventory.length === 0 ? 
+                `<tr><td colspan="10" class="p-10 text-center text-slate-400">Nenhum item corresponde à sua busca.</td></tr>` :
+                filteredInventory.map(item => {
                     const pronto = item.stockPronto || 0;
                     const reman = item.stockReman || 0;
                     const retorno = item.stockRetorno || 0;
                     const total = pronto + reman + retorno;
-                    
                     const min = item.minStock || 0;
                     const max = item.maxStock || 100;
-                    const type = item.type || 'Insumo';
-                    const imageUrl = item.imageUrl || '';
 
                     let statusLabel = "";
                     let statusClasses = "";
@@ -423,52 +416,34 @@
                         statusLabel = "Excesso";
                         statusClasses = "bg-emerald-100 text-emerald-700 border-emerald-200";
                     } else {
-                        statusLabel = "OK";
-                        statusClasses = "bg-amber-100 text-amber-700 border-amber-200";
+                        // NOVO STATUS: EM CONTROLE (AZUL)
+                        statusLabel = "Em Controle";
+                        statusClasses = "bg-blue-100 text-blue-700 border-blue-200";
                     }
 
-                    const typeColors = {
-                        'Insumo': "bg-blue-50 text-blue-600 border-blue-100",
-                        'Ferramenta': "bg-orange-50 text-orange-600 border-orange-100",
-                        'Locação': "bg-purple-50 text-purple-600 border-purple-100",
-                        'Cartão': "bg-pink-50 text-pink-600 border-pink-100"
-                    };
-                    const typeClass = typeColors[type] || "bg-slate-100 text-slate-600";
+                    const typeColors = { 'Insumo': "bg-slate-100 text-slate-600 border-slate-200", 'Ferramenta': "bg-orange-50 text-orange-600 border-orange-100", 'Locação': "bg-purple-50 text-purple-600 border-purple-100", 'Cartão': "bg-pink-50 text-pink-600 border-pink-100" };
+                    const typeClass = typeColors[item.type] || "bg-slate-100 text-slate-600";
 
-                    // Fallback para imagem
-                    const imgHtml = imageUrl 
-                        ? `<div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center mx-auto"><img src="${imageUrl}" alt="${item.name}" class="w-full h-full object-cover"></div>`
+                    const imgHtml = item.imageUrl 
+                        ? `<div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center mx-auto"><img src="${item.imageUrl}" class="w-full h-full object-cover"></div>`
                         : `<div class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300 mx-auto"><i data-lucide="package" size="18"></i></div>`;
 
                     return `
                         <tr class="hover:bg-slate-50 border-b border-slate-50 transition-colors">
                             <td class="p-3">${imgHtml}</td>
                             <td class="p-4 font-bold text-slate-700">${item.name}</td>
-                            <td class="p-4 text-center">
-                                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase border ${typeClass}">
-                                    ${type}
-                                </span>
-                            </td>
-                            <td class="p-4 text-center">
-                                <span class="px-2 py-1 rounded-full text-[10px] font-black uppercase border ${statusClasses}">
-                                    ${statusLabel}
-                                </span>
-                            </td>
-                            <td class="p-4 text-center font-black bg-slate-50 text-slate-900 text-base border-x border-slate-100">${total}</td>
+                            <td class="p-4 text-center"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase border ${typeClass}">${item.type}</span></td>
+                            <td class="p-4 text-center"><span class="px-2 py-1 rounded-full text-[10px] font-black uppercase border ${statusClasses}">${statusLabel}</span></td>
+                            <td class="p-4 text-center font-black bg-slate-50 text-slate-900 border-x border-slate-100">${total}</td>
                             <td class="p-4 text-center font-bold text-emerald-600 bg-emerald-50/30">${pronto}</td>
                             <td class="p-4 text-center font-bold text-blue-500 bg-blue-50/30">${reman}</td>
                             <td class="p-4 text-center font-bold text-amber-500 bg-amber-50/30">${retorno}</td>
                             <td class="p-4 text-center text-slate-400 text-[10px] font-mono">${min} - ${max}</td>
                             <td class="p-4 text-center flex items-center justify-center gap-2">
-                                <button onclick="openEditModal('${item.id}', '${item.name}', ${min}, ${item.maxStock || 0}, '${type}')" class="text-slate-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Editar">
-                                    <i data-lucide="pencil" size="16"></i>
-                                </button>
-                                <button onclick="deleteMaterial('${item.id}', '${item.name}')" class="text-slate-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors" title="Excluir">
-                                    <i data-lucide="trash-2" size="16"></i>
-                                </button>
+                                <button onclick="openEditModal('${item.id}', '${item.name}', ${min}, ${item.maxStock || 0}, '${item.type}')" class="text-slate-400 hover:text-blue-600 p-2 rounded-lg transition-colors"><i data-lucide="pencil" size="16"></i></button>
+                                <button onclick="deleteMaterial('${item.id}', '${item.name}')" class="text-slate-400 hover:text-red-600 p-2 rounded-lg transition-colors"><i data-lucide="trash-2" size="16"></i></button>
                             </td>
-                        </tr>
-                    `;
+                        </tr>`;
                 }).join('');
             lucide.createIcons();
         }
@@ -476,29 +451,14 @@
         function renderHistory(logs) {
             const body = document.getElementById('history-table-body');
             if(!body) return;
-            
-            const actionColors = {
-                'Entrada': 'text-emerald-600 bg-emerald-50',
-                'Saída': 'text-red-600 bg-red-50',
-                'Exclusão': 'text-red-800 bg-red-100',
-                'Transferência': 'text-blue-600 bg-blue-50'
-            };
-
-            body.innerHTML = logs.slice(0, 20).map(h => {
-                const colorClass = actionColors[h.action] || 'text-slate-500';
-                return `
+            body.innerHTML = logs.slice(0, 20).map(h => `
                 <tr class="text-xs hover:bg-slate-50 transition-colors">
                     <td class="p-4 text-slate-500 font-mono">${h.date || '...'}</td>
-                    <td class="p-4">
-                        <span class="px-2 py-1 rounded-md font-bold uppercase text-[10px] ${colorClass}">
-                            ${h.action}
-                        </span>
-                    </td>
+                    <td class="p-4"><span class="px-2 py-1 rounded-md font-bold uppercase text-[10px] ${h.action === 'Entrada' ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'}">${h.action}</span></td>
                     <td class="p-4 font-bold text-slate-700">${h.item}</td>
                     <td class="p-4 text-center font-black text-slate-600">${h.qty || '-'}</td>
                     <td class="p-4 text-slate-500 italic truncate max-w-[200px]">${h.detail || '-'}</td>
-                </tr>
-            `}).join('');
+                </tr>`).join('');
         }
 
         function updateSelects() {
@@ -517,138 +477,66 @@
                 const total = (i.stockPronto || 0) + (i.stockReman || 0) + (i.stockRetorno || 0);
                 return total < (i.minStock || 0);
             }).length;
-            
-            if(document.getElementById('stat-reman')) document.getElementById('stat-reman').innerText = reman;
-            if(document.getElementById('stat-retorno')) document.getElementById('stat-retorno').innerText = retorno;
-            if(document.getElementById('stat-alerta')) document.getElementById('stat-alerta').innerText = alertas;
+            document.getElementById('stat-reman').innerText = reman;
+            document.getElementById('stat-retorno').innerText = retorno;
+            document.getElementById('stat-alerta').innerText = alertas;
         }
 
-        // --- MANIPULAÇÃO DE IMAGENS ---
         window.compressImage = (file) => {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
-                reader.onload = (event) => {
+                reader.onload = (e) => {
                     const img = new Image();
-                    img.src = event.target.result;
+                    img.src = e.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 400;
-                        const MAX_HEIGHT = 400;
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > height) {
-                            if (width > MAX_WIDTH) {
-                                height *= MAX_WIDTH / width;
-                                width = MAX_WIDTH;
-                            }
-                        } else {
-                            if (height > MAX_HEIGHT) {
-                                width *= MAX_HEIGHT / height;
-                                height = MAX_HEIGHT;
-                            }
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.7)); // Compressa para JPEG 70%
+                        const MAX_W = 400; let w = img.width, h = img.height;
+                        if (w > MAX_W) { h *= MAX_W / w; w = MAX_W; }
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
                     };
-                    img.onerror = (err) => reject(err);
                 };
-                reader.onerror = (err) => reject(err);
             });
         };
 
         window.handleFileSelect = (input, previewId, isEdit = false) => {
             if (input.files && input.files[0]) {
-                const file = input.files[0];
                 const reader = new FileReader();
-                
-                reader.onload = function(e) {
+                reader.onload = (e) => {
                     const container = document.getElementById(previewId);
-                    if(isEdit) {
-                        // Modo edição: substitui o ícone pela imagem
-                        container.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
-                    } else {
-                        // Modo novo: visual diferente
-                        container.innerHTML = `
-                            <img src="${e.target.result}" class="w-24 h-24 rounded-lg object-cover shadow-sm border border-slate-200 mb-2">
-                            <span class="text-[10px] text-emerald-600 font-bold uppercase">Foto Selecionada</span>
-                        `;
-                    }
-                }
-                
-                reader.readAsDataURL(file);
+                    if(isEdit) container.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                    else container.innerHTML = `<img src="${e.target.result}" class="w-24 h-24 rounded-lg object-cover shadow-sm border border-slate-200 mb-2"><span class="text-[10px] text-emerald-600 font-bold uppercase">Foto Selecionada</span>`;
+                };
+                reader.readAsDataURL(input.files[0]);
             }
         };
 
-        // Funções Globais
         window.openEditModal = (id, name, min, max, type) => {
             document.getElementById('edit-id').value = id;
             document.getElementById('edit-name').value = name;
             document.getElementById('edit-min').value = min;
             document.getElementById('edit-max').value = max;
-            
             const item = currentInventory.find(i => i.id === id);
             const imgContainer = document.getElementById('edit-current-img-container');
-            if(item && item.imageUrl) {
-                imgContainer.innerHTML = `<img src="${item.imageUrl}" class="w-full h-full object-cover">`;
-            } else {
-                imgContainer.innerHTML = `<i data-lucide="image" class="text-slate-300"></i>`;
-                lucide.createIcons();
-            }
-
-            const typeSelect = document.getElementById('edit-type');
-            if(typeSelect) typeSelect.value = type || 'Insumo';
-            
+            if(item && item.imageUrl) imgContainer.innerHTML = `<img src="${item.imageUrl}" class="w-full h-full object-cover">`;
+            else { imgContainer.innerHTML = `<i data-lucide="image" class="text-slate-300"></i>`; lucide.createIcons(); }
+            document.getElementById('edit-type').value = type || 'Insumo';
             document.getElementById('edit-modal').classList.remove('hidden');
         };
 
-        window.closeEditModal = () => {
-            document.getElementById('edit-modal').classList.add('hidden');
-        };
+        window.closeEditModal = () => document.getElementById('edit-modal').classList.add('hidden');
 
         window.saveEditItem = async () => {
-            const btn = document.querySelector('#edit-modal button.bg-blue-600');
-            const originalText = btn.innerText;
-            btn.innerText = "Salvando...";
-            btn.disabled = true;
-
             const id = document.getElementById('edit-id').value;
-            const name = document.getElementById('edit-name').value;
-            const min = parseInt(document.getElementById('edit-min').value);
-            const max = parseInt(document.getElementById('edit-max').value);
-            const type = document.getElementById('edit-type').value;
             const fileInput = document.getElementById('edit-image-file');
-
-            if(!name || !currentUser) {
-                btn.innerText = originalText;
-                btn.disabled = false;
-                return;
-            }
-
             try {
-                let updateData = { name, minStock: min, maxStock: max, type };
-                
-                // Se escolheu nova imagem, comprime e adiciona
-                if(fileInput.files.length > 0) {
-                    const compressedBase64 = await compressImage(fileInput.files[0]);
-                    updateData.imageUrl = compressedBase64;
-                }
-
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), updateData);
-                showToast("Item atualizado com sucesso!");
-                closeEditModal();
-            } catch(e) { 
-                console.error(e);
-                showToast("Erro ao editar item.", "error"); 
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
+                let data = { name: document.getElementById('edit-name').value, minStock: parseInt(document.getElementById('edit-min').value), maxStock: parseInt(document.getElementById('edit-max').value), type: document.getElementById('edit-type').value };
+                if(fileInput.files.length > 0) data.imageUrl = await compressImage(fileInput.files[0]);
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), data);
+                showToast("Item atualizado!"); closeEditModal();
+            } catch(e) { showToast("Erro ao editar.", "error"); }
         };
 
         window.setTransType = (type) => {
@@ -657,186 +545,68 @@
                 b.classList.remove('bg-white', 'shadow-md', 'text-emerald-600', 'text-red-600', 'text-blue-600');
                 b.classList.add('text-slate-500');
             });
-            const btn = document.getElementById(`type-${type}`);
             const colors = { in: 'text-emerald-600', out: 'text-red-600', transfer: 'text-blue-600' };
-            if(btn) {
-                btn.classList.add('bg-white', 'shadow-md', colors[type]);
-                btn.classList.remove('text-slate-500');
-            }
-            
-            const dynamicLoc = document.getElementById('dynamic-locations');
-            const originContainer = document.getElementById('container-origin');
-            const destContainer = document.getElementById('container-destination');
-            
-            dynamicLoc.classList.remove('hidden');
-            
-            // Lógica de Exibição dos Selects
-            if(type === 'in') {
-                dynamicLoc.classList.add('hidden');
-            } else if (type === 'out') {
-                originContainer.classList.remove('hidden');
-                destContainer.classList.add('hidden');
-            } else if (type === 'transfer') {
-                originContainer.classList.remove('hidden');
-                destContainer.classList.remove('hidden');
-            }
+            document.getElementById(`type-${type}`).classList.add('bg-white', 'shadow-md', colors[type]);
+            document.getElementById('dynamic-locations').classList.toggle('hidden', type === 'in');
+            document.getElementById('container-destination').classList.toggle('hidden', type === 'out');
         };
 
         window.addNewItem = async () => {
-            const btn = document.getElementById('btn-save-new');
-            const originalText = btn.innerText;
-            btn.innerText = "Salvando...";
-            btn.disabled = true;
-
             const name = document.getElementById('new-name').value;
-            const min = parseInt(document.getElementById('new-min').value) || 0;
-            const max = parseInt(document.getElementById('new-max').value) || 0;
-            const type = document.getElementById('new-type').value;
+            if(!name) return showToast("Nome obrigatório", "error");
             const fileInput = document.getElementById('new-image-file');
-            
-            if(!name || !currentUser) {
-                showToast("Preencha o nome do item.", "error");
-                btn.innerText = originalText;
-                btn.disabled = false;
-                return;
-            }
-
             try {
-                let imageUrl = "";
-                // Processa a imagem se existir
-                if (fileInput.files.length > 0) {
-                    imageUrl = await compressImage(fileInput.files[0]);
-                }
-
+                let imageUrl = fileInput.files.length > 0 ? await compressImage(fileInput.files[0]) : "";
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'inventory'), {
-                    name, minStock: min, maxStock: max, type, imageUrl,
-                    stockPronto: 0, stockReman: 0, stockRetorno: 0,
-                    timestamp: serverTimestamp()
+                    name, minStock: parseInt(document.getElementById('new-min').value) || 0, maxStock: parseInt(document.getElementById('new-max').value) || 0,
+                    type: document.getElementById('new-type').value, imageUrl, stockPronto: 0, stockReman: 0, stockRetorno: 0, timestamp: serverTimestamp()
                 });
-                
-                // Limpa campos
-                document.getElementById('new-name').value = '';
-                document.getElementById('new-image-file').value = ''; 
-                document.getElementById('new-preview-container').innerHTML = `
-                    <i data-lucide="upload-cloud" size="32" class="mb-2"></i>
-                    <span class="text-xs font-bold uppercase">Clique para enviar foto</span>
-                    <span class="text-[10px] mt-1 text-slate-300">Max: 1MB (Redimensionado auto.)</span>
-                `;
-                lucide.createIcons();
-
-                showToast("Item cadastrado com sucesso!");
-                showTab('dashboard');
-            } catch(e) { 
-                console.error(e);
-                showToast("Erro ao gravar novo item.", "error"); 
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
+                showToast("Item cadastrado!"); showTab('dashboard');
+            } catch(e) { showToast("Erro ao gravar", "error"); }
         };
 
         window.deleteMaterial = async (id, name) => {
-            if(!currentUser) return;
-            const confirmed = window.confirm(`ATENÇÃO: Deseja excluir permanentemente "${name}" e todo seu histórico de contagem?`);
-            if(confirmed) {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id));
-                    addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
-                        item: name, action: 'Exclusão', qty: 0, detail: 'Removido do sistema', date: new Date().toLocaleString('pt-BR'), timestamp: serverTimestamp()
-                    });
-                    showToast("Item excluído.");
-                } catch(e) { showToast("Erro ao excluir.", "error"); }
+            if(confirm(`Excluir "${name}"?`)) {
+                try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id)); showToast("Excluído."); }
+                catch(e) { showToast("Erro ao excluir.", "error"); }
             }
         };
 
         window.handleTransaction = async () => {
-            const btn = document.getElementById('btn-confirm-trans');
-            if(btn) btn.disabled = true;
-
             const id = document.getElementById('trans-item').value;
             const qty = parseInt(document.getElementById('trans-qty').value);
-            const reason = document.getElementById('trans-reason').value;
-            
-            if(!id) { showToast("Selecione um item!", "error"); if(btn) btn.disabled = false; return; }
-            if(isNaN(qty) || qty <= 0) { showToast("Quantidade inválida!", "error"); if(btn) btn.disabled = false; return; }
-            if(!currentUser) return;
+            if(!id || isNaN(qty) || qty <= 0) return showToast("Dados inválidos", "error");
 
             const item = currentInventory.find(i => i.id === id);
             const data = { ...item }; delete data.id;
-
             const from = document.getElementById('trans-from').value;
             const to = document.getElementById('trans-to').value;
 
-            if(currentTransactionType === 'in') {
-                data.stockPronto = (data.stockPronto || 0) + qty;
-            } 
-            else if(currentTransactionType === 'out') {
-                if((data[from] || 0) < qty) {
-                    showToast("Saldo insuficiente na origem selecionada!", "error");
-                    if(btn) btn.disabled = false;
-                    return;
-                }
+            if(currentTransactionType === 'in') data.stockPronto = (data.stockPronto || 0) + qty;
+            else {
+                if((data[from] || 0) < qty) return showToast("Saldo insuficiente!", "error");
                 data[from] -= qty;
-            } 
-            else if (currentTransactionType === 'transfer') {
-                if(from === to) { showToast("Origem e Destino são iguais.", "info"); if(btn) btn.disabled = false; return; }
-                if((data[from] || 0) < qty) {
-                    showToast("Saldo insuficiente para transferência!", "error");
-                    if(btn) btn.disabled = false;
-                    return;
-                }
-                data[from] -= qty;
-                data[to] = (data[to] || 0) + qty;
+                if(currentTransactionType === 'transfer') data[to] = (data[to] || 0) + qty;
             }
 
             try {
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), data);
-                
-                let actionLabel = 'Transferência';
-                if(currentTransactionType === 'in') actionLabel = 'Entrada';
-                if(currentTransactionType === 'out') actionLabel = 'Saída';
-
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
-                    item: item.name, 
-                    action: actionLabel,
-                    qty, 
-                    detail: reason || (currentTransactionType === 'transfer' ? `${from} -> ${to}` : ''), 
-                    date: new Date().toLocaleString('pt-BR'), 
-                    timestamp: serverTimestamp()
+                    item: item.name, action: currentTransactionType === 'in' ? 'Entrada' : (currentTransactionType === 'out' ? 'Saída' : 'Transferência'),
+                    qty, detail: document.getElementById('trans-reason').value || '', date: new Date().toLocaleString('pt-BR'), timestamp: serverTimestamp()
                 });
-
-                showToast("Movimentação registrada!");
-                document.getElementById('trans-qty').value = '';
-                document.getElementById('trans-reason').value = '';
-                showTab('dashboard');
-            } catch(e) { 
-                console.error(e);
-                showToast("Erro ao processar.", "error"); 
-            } finally {
-                if(btn) btn.disabled = false;
-            }
+                showToast("Sucesso!"); showTab('dashboard');
+            } catch(e) { showToast("Erro ao processar.", "error"); }
         };
 
         window.showTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-            const target = document.getElementById(id);
-            if(target) target.classList.add('active');
-            const btn = document.getElementById(`btn-${id}`);
-            if(btn) btn.classList.add('active');
-            
-            const titles = {
-                'dashboard': 'Visão Geral',
-                'movements': 'Movimentação de Estoque',
-                'new': 'Cadastro de Material',
-                'history': 'Histórico de Operações'
-            };
-            document.getElementById('page-title').innerText = titles[id] || 'Gestão';
-            
+            document.getElementById(id).classList.add('active');
+            document.getElementById(`btn-${id}`).classList.add('active');
             lucide.createIcons();
         };
 
-        initSession();
         lucide.createIcons();
     </script>
 </body>
