@@ -15,6 +15,8 @@
         .tab-content.active { display: block; }
         .sidebar-btn.active { background-color: #2563eb; color: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        /* Animação suave para o modal */
+        #edit-modal { transition: opacity 0.2s ease-in-out; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col md:flex-row">
@@ -45,7 +47,7 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+    <main class="flex-1 p-6 md:p-10 overflow-y-auto relative">
         <header class="flex justify-between items-center mb-8">
             <h2 id="page-title" class="text-2xl font-black text-slate-800 uppercase tracking-tight">Status do Estoque</h2>
             <div class="flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-slate-200 shadow-sm">
@@ -177,6 +179,37 @@
         </div>
     </main>
 
+    <!-- Modal de Edição (NOVO) -->
+    <div id="edit-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Editar Item</h3>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" size="20"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="edit-id">
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Nome</label>
+                    <input id="edit-name" type="text" class="w-full p-3 border-2 border-slate-100 rounded-lg font-bold outline-none focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Mínimo</label>
+                        <input id="edit-min" type="number" class="w-full p-3 border-2 border-slate-100 rounded-lg outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Máximo</label>
+                        <input id="edit-max" type="number" class="w-full p-3 border-2 border-slate-100 rounded-lg outline-none focus:border-blue-500">
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+                <button onclick="closeEditModal()" class="flex-1 py-3 text-slate-500 font-bold hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
+                <button onclick="saveEditItem()" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -200,8 +233,8 @@
         const appId = 'rastreadores-main-db';
 
         let currentInventory = [];
-        let currentTransactionType = 'in';
         let currentUser = null;
+        let currentTransactionType = 'in';
 
         const updateStatus = (text, color) => {
             const dot = document.getElementById('connection-status-dot');
@@ -266,7 +299,6 @@
                     let statusLabel = "";
                     let statusClasses = "";
 
-                    // Lógica baseada no TOTAL (Pronto + Reman + Retorno)
                     if (total < min) {
                         statusLabel = "Estoque Baixo";
                         statusClasses = "bg-red-100 text-red-700 border-red-200";
@@ -291,7 +323,10 @@
                             <td class="p-4 text-center font-bold text-blue-500">${reman}</td>
                             <td class="p-4 text-center font-bold text-amber-500">${retorno}</td>
                             <td class="p-4 text-center text-slate-400 text-[10px] font-mono">${min} / ${item.maxStock || '-'}</td>
-                            <td class="p-4 text-center">
+                            <td class="p-4 text-center flex items-center justify-center gap-2">
+                                <button onclick="openEditModal('${item.id}', '${item.name}', ${min}, ${item.maxStock || 0})" class="text-slate-300 hover:text-blue-500 transition-colors p-1" title="Editar Limites">
+                                    <i data-lucide="pencil" size="16"></i>
+                                </button>
                                 <button onclick="deleteMaterial('${item.id}', '${item.name}')" class="text-slate-300 hover:text-red-500 transition-colors p-1" title="Excluir Material">
                                     <i data-lucide="trash-2" size="16"></i>
                                 </button>
@@ -328,8 +363,6 @@
         function updateStats() {
             const reman = currentInventory.reduce((a,c) => a + (c.stockReman || 0), 0);
             const retorno = currentInventory.reduce((a,c) => a + (c.stockRetorno || 0), 0);
-            
-            // Alertas agora contam quantos itens estão com TOTAL abaixo do mínimo
             const alertas = currentInventory.filter(i => {
                 const total = (i.stockPronto || 0) + (i.stockReman || 0) + (i.stockRetorno || 0);
                 return total < (i.minStock || 0);
@@ -339,6 +372,35 @@
             if(document.getElementById('stat-retorno')) document.getElementById('stat-retorno').innerText = retorno;
             if(document.getElementById('stat-alerta')) document.getElementById('stat-alerta').innerText = alertas;
         }
+
+        // Funções Globais (Edit e Delete)
+        window.openEditModal = (id, name, min, max) => {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-min').value = min;
+            document.getElementById('edit-max').value = max;
+            document.getElementById('edit-modal').classList.remove('hidden');
+        };
+
+        window.closeEditModal = () => {
+            document.getElementById('edit-modal').classList.add('hidden');
+        };
+
+        window.saveEditItem = async () => {
+            const id = document.getElementById('edit-id').value;
+            const name = document.getElementById('edit-name').value;
+            const min = parseInt(document.getElementById('edit-min').value);
+            const max = parseInt(document.getElementById('edit-max').value);
+
+            if(!name || !currentUser) return;
+
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), {
+                    name, minStock: min, maxStock: max
+                });
+                closeEditModal();
+            } catch(e) { alert("Erro ao editar."); }
+        };
 
         window.setTransType = (type) => {
             currentTransactionType = type;
