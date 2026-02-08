@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Estoque - SCM</title>
-    <!-- Tailwind CSS para o design -->
+    <title>CONTROLE DE ESTOQUE - SCM</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -12,19 +12,34 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content.active { display: block; animate: fade-in 0.3s; }
         .sidebar-btn.active { background-color: #2563eb; color: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        #edit-modal { transition: opacity 0.2s ease-in-out; }
+        
+        /* Animações e Toast */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast { animation: slideIn 0.3s ease-out forwards; }
+        
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col md:flex-row">
+<body class="bg-slate-50 min-h-screen flex flex-col md:flex-row text-slate-800">
+
+    <!-- Container de Notificações -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
 
     <!-- Sidebar -->
-    <aside class="w-full md:w-64 bg-slate-900 text-slate-400 flex flex-col shadow-2xl">
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-400 flex flex-col shadow-2xl z-20">
         <div class="p-6 border-b border-slate-800 flex items-center gap-3">
-            <i data-lucide="truck" class="text-blue-500"></i>
-            <h1 class="text-white font-black text-xl tracking-tighter">Controle de Estoque - SCM</h1>
+            <i data-lucide="package-search" class="text-blue-500"></i>
+            <h1 class="text-white font-black text-xl tracking-tighter">Controle de Estoque</h1>
         </div>
         <nav class="p-4 flex-1 space-y-1">
             <button onclick="showTab('dashboard')" id="btn-dashboard" class="sidebar-btn active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-slate-800 hover:text-white">
@@ -46,9 +61,9 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 p-6 md:p-10 overflow-y-auto relative">
-        <header class="flex justify-between items-center mb-8">
-            <h2 id="page-title" class="text-2xl font-black text-slate-800 uppercase tracking-tight">Status do Estoque</h2>
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto relative h-screen">
+        <header class="flex justify-between items-center mb-8 sticky top-0 bg-slate-50/90 backdrop-blur-sm z-10 py-2">
+            <h2 id="page-title" class="text-2xl font-black text-slate-800 uppercase tracking-tight">Visão Geral</h2>
             <div class="flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-slate-200 shadow-sm">
                 <div id="connection-status-dot" class="status-dot bg-slate-300"></div>
                 <span id="connection-status-text" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Conectando...</span>
@@ -58,70 +73,76 @@
         <!-- Dashboard -->
         <div id="dashboard" class="tab-content active space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-500">
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Remanufatura</p>
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-500 hover:shadow-md transition-shadow">
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Em Remanufatura</p>
                     <h3 id="stat-reman" class="text-3xl font-black text-slate-800 mt-1">0</h3>
                 </div>
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-amber-500">
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Equip. Retorno</p>
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-amber-500 hover:shadow-md transition-shadow">
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Em Retorno</p>
                     <h3 id="stat-retorno" class="text-3xl font-black text-slate-800 mt-1">0</h3>
                 </div>
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-red-500">
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Total Baixo (Mínimo)</p>
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-red-500 hover:shadow-md transition-shadow">
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Abaixo do Mínimo</p>
                     <h3 id="stat-alerta" class="text-3xl font-black text-red-600 mt-1">0</h3>
                 </div>
             </div>
 
             <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                            <th class="p-4 font-bold text-slate-600">Material</th>
-                            <th class="p-4 text-center text-slate-600">Tipo</th>
-                            <th class="p-4 text-center text-slate-600">Status Geral</th>
-                            <th class="p-4 text-center text-slate-900 bg-slate-100 font-black">Total</th>
-                            <th class="p-4 text-center text-emerald-600">Pronto</th>
-                            <th class="p-4 text-center text-blue-600">Reman</th>
-                            <th class="p-4 text-center text-amber-600">Retorno</th>
-                            <th class="p-4 text-center text-slate-400">Limites (Min/Max)</th>
-                            <th class="p-4 text-center text-slate-400">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventory-table-body" class="divide-y divide-slate-100">
-                        <tr><td colspan="9" class="p-10 text-center text-slate-400 italic">Sincronizando...</td></tr>
-                    </tbody>
-                </table>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th class="p-4 font-bold text-slate-600 w-20 text-center">Img</th>
+                                <th class="p-4 font-bold text-slate-600">Material</th>
+                                <th class="p-4 text-center text-slate-600">Tipo</th>
+                                <th class="p-4 text-center text-slate-600">Status</th>
+                                <th class="p-4 text-center text-slate-900 bg-slate-100 font-black">Total</th>
+                                <th class="p-4 text-center text-emerald-600" title="Pronto Uso">Pronto</th>
+                                <th class="p-4 text-center text-blue-600" title="Remanufatura">Reman</th>
+                                <th class="p-4 text-center text-amber-600" title="Retorno">Retorno</th>
+                                <th class="p-4 text-center text-slate-400">Min/Max</th>
+                                <th class="p-4 text-center text-slate-400">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table-body" class="divide-y divide-slate-100">
+                            <tr><td colspan="10" class="p-10 text-center text-slate-400 italic">Sincronizando dados...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <!-- Movimentação -->
-        <div id="movements" class="tab-content max-w-2xl mx-auto space-y-6">
-            <div class="bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
+        <div id="movements" class="tab-content max-w-2xl mx-auto space-y-6 animate-fade-in">
+            <div class="bg-white p-6 md:p-8 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="text-lg font-bold text-slate-700 mb-6 border-b pb-2">Registrar Movimentação</h3>
+                
                 <div class="grid grid-cols-1 gap-4 mb-6">
                     <label class="text-xs font-bold text-slate-400 uppercase">Produto Selecionado</label>
-                    <select id="trans-item" class="p-3 border-2 border-slate-100 rounded-lg bg-slate-50 font-bold outline-none focus:border-blue-500">
+                    <select id="trans-item" class="p-3 border-2 border-slate-100 rounded-lg bg-slate-50 font-bold outline-none focus:border-blue-500 focus:bg-white transition-all w-full">
                         <option value="">Aguardando itens...</option>
                     </select>
                     
-                    <div class="flex gap-2 p-1 bg-slate-100 rounded-xl mt-2">
-                        <button onclick="setTransType('in')" id="type-in" class="type-btn flex-1 py-3 rounded-lg font-black text-xs transition-all bg-white text-emerald-600 shadow-md uppercase">Entrada</button>
-                        <button onclick="setTransType('out')" id="type-out" class="type-btn flex-1 py-3 rounded-lg font-black text-xs transition-all text-slate-500 uppercase">Saída</button>
-                        <button onclick="setTransType('transfer')" id="type-transfer" class="type-btn flex-1 py-3 rounded-lg font-black text-xs transition-all text-slate-500 uppercase">Transferência</button>
+                    <div class="flex flex-wrap gap-2 p-1 bg-slate-100 rounded-xl mt-2">
+                        <button onclick="setTransType('in')" id="type-in" class="type-btn flex-1 py-3 px-2 rounded-lg font-black text-xs transition-all bg-white text-emerald-600 shadow-md uppercase">Entrada</button>
+                        <button onclick="setTransType('out')" id="type-out" class="type-btn flex-1 py-3 px-2 rounded-lg font-black text-xs transition-all text-slate-500 uppercase">Saída</button>
+                        <button onclick="setTransType('transfer')" id="type-transfer" class="type-btn flex-1 py-3 px-2 rounded-lg font-black text-xs transition-all text-slate-500 uppercase">Transferência</button>
                     </div>
                 </div>
 
-                <div id="transfer-options" class="hidden grid grid-cols-2 gap-4 mb-6">
-                    <div>
+                <!-- Área Dinâmica de Origem/Destino -->
+                <div id="dynamic-locations" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 hidden">
+                    <div id="container-origin">
                         <label class="text-[10px] uppercase font-bold text-slate-400">Origem</label>
-                        <select id="trans-from" class="w-full p-3 border rounded-lg text-sm bg-slate-50">
+                        <select id="trans-from" class="w-full p-3 border rounded-lg text-sm bg-slate-50 focus:border-blue-500 outline-none">
                             <option value="stockPronto">Pronto Uso</option>
                             <option value="stockReman">Remanufatura</option>
                             <option value="stockRetorno">Retorno</option>
                         </select>
                     </div>
-                    <div>
+                    <div id="container-destination">
                         <label class="text-[10px] uppercase font-bold text-slate-400">Destino</label>
-                        <select id="trans-to" class="w-full p-3 border rounded-lg text-sm bg-slate-50">
+                        <select id="trans-to" class="w-full p-3 border rounded-lg text-sm bg-slate-50 focus:border-blue-500 outline-none">
                             <option value="stockPronto">Pronto Uso</option>
                             <option value="stockReman">Remanufatura</option>
                             <option value="stockRetorno">Retorno</option>
@@ -129,17 +150,40 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="trans-qty" placeholder="Quantidade" value="1" min="1" class="p-3 border-2 border-slate-100 rounded-lg outline-none focus:border-blue-500">
-                    <input type="text" id="trans-reason" placeholder="Obs / Placa / OS" class="p-3 border-2 border-slate-100 rounded-lg outline-none focus:border-blue-500">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Quantidade</label>
+                        <input type="number" id="trans-qty" placeholder="1" value="" min="1" class="w-full p-3 border-2 border-slate-100 rounded-lg outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Observação</label>
+                        <input type="text" id="trans-reason" placeholder="Obs / Placa / OS" class="w-full p-3 border-2 border-slate-100 rounded-lg outline-none focus:border-blue-500">
+                    </div>
                 </div>
-                <button onclick="handleTransaction()" class="w-full py-4 bg-blue-600 text-white rounded-lg font-black uppercase tracking-widest mt-6 hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-200">Confirmar Operação</button>
+                <button id="btn-confirm-trans" onclick="handleTransaction()" class="w-full py-4 bg-blue-600 text-white rounded-lg font-black uppercase tracking-widest mt-6 hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-200 flex justify-center items-center gap-2">
+                    <span>Confirmar Operação</span>
+                    <i data-lucide="check-circle" size="18"></i>
+                </button>
             </div>
         </div>
 
         <!-- Novo Equipamento -->
         <div id="new" class="tab-content max-w-lg mx-auto">
             <div class="bg-white p-8 rounded-xl border border-slate-200 shadow-sm space-y-6">
+                <h3 class="text-lg font-bold text-slate-700 mb-2 border-b pb-2">Cadastrar Novo Item</h3>
+                
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase">Imagem do Item</label>
+                    <label class="block w-full p-4 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all text-center group relative overflow-hidden bg-slate-50">
+                        <input type="file" id="new-image-file" accept="image/*" class="hidden" onchange="handleFileSelect(this, 'new-preview-container')">
+                        <div id="new-preview-container" class="flex flex-col items-center justify-center text-slate-400 py-4">
+                            <i data-lucide="upload-cloud" size="32" class="mb-2 group-hover:text-blue-500 transition-colors"></i>
+                            <span class="text-xs font-bold uppercase group-hover:text-blue-600">Clique para enviar foto</span>
+                            <span class="text-[10px] mt-1 text-slate-300">Max: 1MB (Redimensionado auto.)</span>
+                        </div>
+                    </label>
+                </div>
+
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-slate-400 uppercase">Descrição do Equipamento</label>
                     <input type="text" id="new-name" placeholder="Ex: Suntech ST310U" class="w-full p-4 border-2 border-slate-100 rounded-xl outline-none font-bold focus:border-blue-500">
@@ -158,47 +202,65 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="text-[10px] font-bold text-slate-400 uppercase">Estoque Mínimo</label>
-                        <input type="number" id="new-min" value="5" class="w-full p-4 border-2 border-slate-100 rounded-xl">
+                        <input type="number" id="new-min" value="5" class="w-full p-4 border-2 border-slate-100 rounded-xl outline-none focus:border-blue-500">
                     </div>
                     <div class="space-y-2">
                         <label class="text-[10px] font-bold text-slate-400 uppercase">Estoque Máximo</label>
-                        <input type="number" id="new-max" value="20" class="w-full p-4 border-2 border-slate-100 rounded-xl">
+                        <input type="number" id="new-max" value="20" class="w-full p-4 border-2 border-slate-100 rounded-xl outline-none focus:border-blue-500">
                     </div>
                 </div>
-                <button onclick="addNewItem()" class="w-full py-4 bg-blue-600 text-white rounded-lg font-black uppercase tracking-widest hover:bg-blue-700 transition-all">Salvar no Inventário</button>
+                <button id="btn-save-new" onclick="addNewItem()" class="w-full py-4 bg-emerald-600 text-white rounded-lg font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200">Salvar no Inventário</button>
             </div>
         </div>
 
         <!-- Histórico -->
         <div id="history" class="tab-content">
             <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xl">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-900 border-b border-slate-800">
-                        <tr class="text-[10px] uppercase text-slate-500 font-bold">
-                            <th class="p-4">Data e Hora</th>
-                            <th class="p-4">Tipo</th>
-                            <th class="p-4">Equipamento</th>
-                            <th class="p-4 text-center">Qtd</th>
-                            <th class="p-4">Detalhes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-table-body" class="divide-y divide-slate-100">
-                        <tr><td colspan="5" class="p-10 text-center text-slate-400">Aguardando registros...</td></tr>
-                    </tbody>
-                </table>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-slate-900 border-b border-slate-800">
+                            <tr class="text-[10px] uppercase text-slate-500 font-bold">
+                                <th class="p-4">Data e Hora</th>
+                                <th class="p-4">Ação</th>
+                                <th class="p-4">Item</th>
+                                <th class="p-4 text-center">Qtd</th>
+                                <th class="p-4">Obs</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body" class="divide-y divide-slate-100">
+                            <tr><td colspan="5" class="p-10 text-center text-slate-400">Carregando histórico...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
 
     <!-- Modal de Edição -->
-    <div id="edit-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div id="edit-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
             <div class="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
                 <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Editar Item</h3>
-                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" size="20"></i></button>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-red-500 transition-colors"><i data-lucide="x" size="24"></i></button>
             </div>
             <div class="p-6 space-y-4">
                 <input type="hidden" id="edit-id">
+                
+                <div class="space-y-1">
+                    <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Imagem</label>
+                    <div class="flex items-center gap-4">
+                        <div id="edit-current-img-container" class="w-16 h-16 rounded-lg bg-slate-100 border border-slate-200 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                            <i data-lucide="image" class="text-slate-300"></i>
+                        </div>
+                        <label class="flex-1 cursor-pointer">
+                            <div class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 text-center transition-colors">
+                                Alterar Foto...
+                            </div>
+                            <input type="file" id="edit-image-file" accept="image/*" class="hidden" onchange="handleFileSelect(this, 'edit-current-img-container', true)">
+                        </label>
+                    </div>
+                </div>
+
                 <div>
                     <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Nome</label>
                     <input id="edit-name" type="text" class="w-full p-3 border-2 border-slate-100 rounded-lg font-bold outline-none focus:border-blue-500">
@@ -224,8 +286,8 @@
                 </div>
             </div>
             <div class="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
-                <button onclick="closeEditModal()" class="flex-1 py-3 text-slate-500 font-bold hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
-                <button onclick="saveEditItem()" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">Salvar Alterações</button>
+                <button onclick="closeEditModal()" class="flex-1 py-3 text-slate-500 font-bold hover:bg-slate-200 rounded-lg transition-colors">Cancelar</button>
+                <button onclick="saveEditItem()" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">Salvar</button>
             </div>
         </div>
     </div>
@@ -233,28 +295,51 @@
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyATO-PdFidpnuPrPMq36oKTDFlpSxbsxDA",
+        // CONFIGURAÇÃO DO FIREBASE (Automática para o Preview)
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyATO-PdFidpnuPrPMq36oKTDFlpSxbsxDA", 
             authDomain: "meuestoquerastreadores.firebaseapp.com",
             projectId: "meuestoquerastreadores",
             storageBucket: "meuestoquerastreadores.firebasestorage.app",
             messagingSenderId: "808134691039",
-            appId: "1:808134691039:web:c7af29edeea9b3e202016a",
-            measurementId: "G-1EYY1DYQXR"
+            appId: "1:808134691039:web:c7af29edeea9b3e202016a"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        const appId = 'rastreadores-main-db';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'rastreadores-main-db';
 
         let currentInventory = [];
         let currentUser = null;
         let currentTransactionType = 'in';
+
+        // --- SISTEMA DE NOTIFICAÇÕES (TOAST) ---
+        window.showToast = (message, type = 'success') => {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = type === 'error' ? 'bg-red-500' : (type === 'info' ? 'bg-blue-500' : 'bg-emerald-500');
+            const icon = type === 'error' ? 'alert-circle' : 'check-circle';
+            
+            toast.className = `${colors} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 toast mb-2 min-w-[300px] border border-white/10`;
+            toast.innerHTML = `
+                <i data-lucide="${icon}" size="20"></i>
+                <span class="font-bold text-sm">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        };
 
         const updateStatus = (text, color) => {
             const dot = document.getElementById('connection-status-dot');
@@ -265,10 +350,15 @@
 
         const initSession = async () => {
             try {
-                await signInAnonymously(auth);
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
             } catch (err) {
                 console.error("Erro Auth:", err);
                 updateStatus("Erro Acesso", "bg-red-500");
+                showToast("Erro de conexão com servidor", "error");
             }
         };
 
@@ -282,6 +372,8 @@
         });
 
         function startListening() {
+            if (!currentUser) return;
+            
             const invRef = collection(db, 'artifacts', appId, 'public', 'data', 'inventory');
             const histRef = collection(db, 'artifacts', appId, 'public', 'data', 'history');
 
@@ -292,7 +384,10 @@
                 updateStats();
             }, (err) => {
                 console.error("Firestore Error:", err);
-                if(err.code === 'permission-denied') updateStatus("Sem Permissão", "bg-red-500");
+                if(err.code === 'permission-denied') {
+                    updateStatus("Sem Permissão", "bg-red-500");
+                    showToast("Sem permissão de acesso", "error");
+                }
             });
 
             onSnapshot(histRef, (snap) => {
@@ -306,7 +401,7 @@
             const body = document.getElementById('inventory-table-body');
             if(!body) return;
             body.innerHTML = currentInventory.length === 0 ? 
-                `<tr><td colspan="9" class="p-10 text-center text-slate-400">Vazio. Adicione itens em "Novo Cadastro".</td></tr>` :
+                `<tr><td colspan="10" class="p-10 text-center text-slate-400">Nenhum item encontrado. Use "Novo Cadastro".</td></tr>` :
                 currentInventory.map(item => {
                     const pronto = item.stockPronto || 0;
                     const reman = item.stockReman || 0;
@@ -316,30 +411,38 @@
                     const min = item.minStock || 0;
                     const max = item.maxStock || 100;
                     const type = item.type || 'Insumo';
+                    const imageUrl = item.imageUrl || '';
 
                     let statusLabel = "";
                     let statusClasses = "";
 
                     if (total < min) {
-                        statusLabel = "Estoque Baixo";
+                        statusLabel = "Baixo";
                         statusClasses = "bg-red-100 text-red-700 border-red-200";
                     } else if (total > max) {
-                        statusLabel = "Estoque Excedente";
+                        statusLabel = "Excesso";
                         statusClasses = "bg-emerald-100 text-emerald-700 border-emerald-200";
                     } else {
-                        statusLabel = "Estoque Controlado";
+                        statusLabel = "OK";
                         statusClasses = "bg-amber-100 text-amber-700 border-amber-200";
                     }
 
-                    // Cores para os tipos
-                    let typeClass = "bg-slate-100 text-slate-600";
-                    if(type === 'Insumo') typeClass = "bg-blue-50 text-blue-600 border-blue-100";
-                    if(type === 'Ferramenta') typeClass = "bg-orange-50 text-orange-600 border-orange-100";
-                    if(type === 'Locação') typeClass = "bg-purple-50 text-purple-600 border-purple-100";
-                    if(type === 'Cartão') typeClass = "bg-pink-50 text-pink-600 border-pink-100";
+                    const typeColors = {
+                        'Insumo': "bg-blue-50 text-blue-600 border-blue-100",
+                        'Ferramenta': "bg-orange-50 text-orange-600 border-orange-100",
+                        'Locação': "bg-purple-50 text-purple-600 border-purple-100",
+                        'Cartão': "bg-pink-50 text-pink-600 border-pink-100"
+                    };
+                    const typeClass = typeColors[type] || "bg-slate-100 text-slate-600";
+
+                    // Fallback para imagem
+                    const imgHtml = imageUrl 
+                        ? `<div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center mx-auto"><img src="${imageUrl}" alt="${item.name}" class="w-full h-full object-cover"></div>`
+                        : `<div class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300 mx-auto"><i data-lucide="package" size="18"></i></div>`;
 
                     return `
                         <tr class="hover:bg-slate-50 border-b border-slate-50 transition-colors">
+                            <td class="p-3">${imgHtml}</td>
                             <td class="p-4 font-bold text-slate-700">${item.name}</td>
                             <td class="p-4 text-center">
                                 <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase border ${typeClass}">
@@ -351,16 +454,16 @@
                                     ${statusLabel}
                                 </span>
                             </td>
-                            <td class="p-4 text-center font-black bg-slate-50 text-slate-900 text-base">${total}</td>
-                            <td class="p-4 text-center font-bold text-emerald-600">${pronto}</td>
-                            <td class="p-4 text-center font-bold text-blue-500">${reman}</td>
-                            <td class="p-4 text-center font-bold text-amber-500">${retorno}</td>
-                            <td class="p-4 text-center text-slate-400 text-[10px] font-mono">${min} / ${item.maxStock || '-'}</td>
+                            <td class="p-4 text-center font-black bg-slate-50 text-slate-900 text-base border-x border-slate-100">${total}</td>
+                            <td class="p-4 text-center font-bold text-emerald-600 bg-emerald-50/30">${pronto}</td>
+                            <td class="p-4 text-center font-bold text-blue-500 bg-blue-50/30">${reman}</td>
+                            <td class="p-4 text-center font-bold text-amber-500 bg-amber-50/30">${retorno}</td>
+                            <td class="p-4 text-center text-slate-400 text-[10px] font-mono">${min} - ${max}</td>
                             <td class="p-4 text-center flex items-center justify-center gap-2">
-                                <button onclick="openEditModal('${item.id}', '${item.name}', ${min}, ${item.maxStock || 0}, '${type}')" class="text-slate-300 hover:text-blue-500 transition-colors p-1" title="Editar">
+                                <button onclick="openEditModal('${item.id}', '${item.name}', ${min}, ${item.maxStock || 0}, '${type}')" class="text-slate-400 hover:text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors" title="Editar">
                                     <i data-lucide="pencil" size="16"></i>
                                 </button>
-                                <button onclick="deleteMaterial('${item.id}', '${item.name}')" class="text-slate-300 hover:text-red-500 transition-colors p-1" title="Excluir">
+                                <button onclick="deleteMaterial('${item.id}', '${item.name}')" class="text-slate-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors" title="Excluir">
                                     <i data-lucide="trash-2" size="16"></i>
                                 </button>
                             </td>
@@ -373,22 +476,36 @@
         function renderHistory(logs) {
             const body = document.getElementById('history-table-body');
             if(!body) return;
-            body.innerHTML = logs.slice(0, 15).map(h => `
-                <tr class="text-xs">
-                    <td class="p-4 text-slate-400">${h.date || 'Processando...'}</td>
-                    <td class="p-4 font-black ${h.action === 'Entrada' ? 'text-emerald-500' : (h.action === 'Saída' ? 'text-red-500' : (h.action === 'Exclusão' ? 'text-red-800' : 'text-blue-500'))} uppercase">${h.action}</td>
-                    <td class="p-4 font-bold">${h.item}</td>
-                    <td class="p-4 text-center font-black">${h.qty || '-'}</td>
-                    <td class="p-4 text-slate-500">${h.detail || '-'}</td>
+            
+            const actionColors = {
+                'Entrada': 'text-emerald-600 bg-emerald-50',
+                'Saída': 'text-red-600 bg-red-50',
+                'Exclusão': 'text-red-800 bg-red-100',
+                'Transferência': 'text-blue-600 bg-blue-50'
+            };
+
+            body.innerHTML = logs.slice(0, 20).map(h => {
+                const colorClass = actionColors[h.action] || 'text-slate-500';
+                return `
+                <tr class="text-xs hover:bg-slate-50 transition-colors">
+                    <td class="p-4 text-slate-500 font-mono">${h.date || '...'}</td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 rounded-md font-bold uppercase text-[10px] ${colorClass}">
+                            ${h.action}
+                        </span>
+                    </td>
+                    <td class="p-4 font-bold text-slate-700">${h.item}</td>
+                    <td class="p-4 text-center font-black text-slate-600">${h.qty || '-'}</td>
+                    <td class="p-4 text-slate-500 italic truncate max-w-[200px]">${h.detail || '-'}</td>
                 </tr>
-            `).join('');
+            `}).join('');
         }
 
         function updateSelects() {
             const select = document.getElementById('trans-item');
             if(!select) return;
             const current = select.value;
-            select.innerHTML = '<option value="">Escolha o equipamento...</option>' + 
+            select.innerHTML = '<option value="">Selecione o equipamento...</option>' + 
                 currentInventory.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
             select.value = current;
         }
@@ -406,13 +523,84 @@
             if(document.getElementById('stat-alerta')) document.getElementById('stat-alerta').innerText = alertas;
         }
 
+        // --- MANIPULAÇÃO DE IMAGENS ---
+        window.compressImage = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 400;
+                        const MAX_HEIGHT = 400;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7)); // Compressa para JPEG 70%
+                    };
+                    img.onerror = (err) => reject(err);
+                };
+                reader.onerror = (err) => reject(err);
+            });
+        };
+
+        window.handleFileSelect = (input, previewId, isEdit = false) => {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const container = document.getElementById(previewId);
+                    if(isEdit) {
+                        // Modo edição: substitui o ícone pela imagem
+                        container.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                    } else {
+                        // Modo novo: visual diferente
+                        container.innerHTML = `
+                            <img src="${e.target.result}" class="w-24 h-24 rounded-lg object-cover shadow-sm border border-slate-200 mb-2">
+                            <span class="text-[10px] text-emerald-600 font-bold uppercase">Foto Selecionada</span>
+                        `;
+                    }
+                }
+                
+                reader.readAsDataURL(file);
+            }
+        };
+
         // Funções Globais
         window.openEditModal = (id, name, min, max, type) => {
             document.getElementById('edit-id').value = id;
             document.getElementById('edit-name').value = name;
             document.getElementById('edit-min').value = min;
             document.getElementById('edit-max').value = max;
-            // Define o tipo se existir, ou padrão Insumo
+            
+            const item = currentInventory.find(i => i.id === id);
+            const imgContainer = document.getElementById('edit-current-img-container');
+            if(item && item.imageUrl) {
+                imgContainer.innerHTML = `<img src="${item.imageUrl}" class="w-full h-full object-cover">`;
+            } else {
+                imgContainer.innerHTML = `<i data-lucide="image" class="text-slate-300"></i>`;
+                lucide.createIcons();
+            }
+
             const typeSelect = document.getElementById('edit-type');
             if(typeSelect) typeSelect.value = type || 'Insumo';
             
@@ -424,20 +612,43 @@
         };
 
         window.saveEditItem = async () => {
+            const btn = document.querySelector('#edit-modal button.bg-blue-600');
+            const originalText = btn.innerText;
+            btn.innerText = "Salvando...";
+            btn.disabled = true;
+
             const id = document.getElementById('edit-id').value;
             const name = document.getElementById('edit-name').value;
             const min = parseInt(document.getElementById('edit-min').value);
             const max = parseInt(document.getElementById('edit-max').value);
             const type = document.getElementById('edit-type').value;
+            const fileInput = document.getElementById('edit-image-file');
 
-            if(!name || !currentUser) return;
+            if(!name || !currentUser) {
+                btn.innerText = originalText;
+                btn.disabled = false;
+                return;
+            }
 
             try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), {
-                    name, minStock: min, maxStock: max, type
-                });
+                let updateData = { name, minStock: min, maxStock: max, type };
+                
+                // Se escolheu nova imagem, comprime e adiciona
+                if(fileInput.files.length > 0) {
+                    const compressedBase64 = await compressImage(fileInput.files[0]);
+                    updateData.imageUrl = compressedBase64;
+                }
+
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), updateData);
+                showToast("Item atualizado com sucesso!");
                 closeEditModal();
-            } catch(e) { alert("Erro ao editar."); }
+            } catch(e) { 
+                console.error(e);
+                showToast("Erro ao editar item.", "error"); 
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         };
 
         window.setTransType = (type) => {
@@ -452,75 +663,158 @@
                 btn.classList.add('bg-white', 'shadow-md', colors[type]);
                 btn.classList.remove('text-slate-500');
             }
-            const opts = document.getElementById('transfer-options');
-            if(opts) opts.classList.toggle('hidden', type !== 'transfer');
+            
+            const dynamicLoc = document.getElementById('dynamic-locations');
+            const originContainer = document.getElementById('container-origin');
+            const destContainer = document.getElementById('container-destination');
+            
+            dynamicLoc.classList.remove('hidden');
+            
+            // Lógica de Exibição dos Selects
+            if(type === 'in') {
+                dynamicLoc.classList.add('hidden');
+            } else if (type === 'out') {
+                originContainer.classList.remove('hidden');
+                destContainer.classList.add('hidden');
+            } else if (type === 'transfer') {
+                originContainer.classList.remove('hidden');
+                destContainer.classList.remove('hidden');
+            }
         };
 
         window.addNewItem = async () => {
+            const btn = document.getElementById('btn-save-new');
+            const originalText = btn.innerText;
+            btn.innerText = "Salvando...";
+            btn.disabled = true;
+
             const name = document.getElementById('new-name').value;
             const min = parseInt(document.getElementById('new-min').value) || 0;
             const max = parseInt(document.getElementById('new-max').value) || 0;
             const type = document.getElementById('new-type').value;
+            const fileInput = document.getElementById('new-image-file');
             
-            if(!name || !currentUser) return;
+            if(!name || !currentUser) {
+                showToast("Preencha o nome do item.", "error");
+                btn.innerText = originalText;
+                btn.disabled = false;
+                return;
+            }
+
             try {
+                let imageUrl = "";
+                // Processa a imagem se existir
+                if (fileInput.files.length > 0) {
+                    imageUrl = await compressImage(fileInput.files[0]);
+                }
+
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'inventory'), {
-                    name, minStock: min, maxStock: max, type,
+                    name, minStock: min, maxStock: max, type, imageUrl,
                     stockPronto: 0, stockReman: 0, stockRetorno: 0,
                     timestamp: serverTimestamp()
                 });
+                
+                // Limpa campos
                 document.getElementById('new-name').value = '';
+                document.getElementById('new-image-file').value = ''; 
+                document.getElementById('new-preview-container').innerHTML = `
+                    <i data-lucide="upload-cloud" size="32" class="mb-2"></i>
+                    <span class="text-xs font-bold uppercase">Clique para enviar foto</span>
+                    <span class="text-[10px] mt-1 text-slate-300">Max: 1MB (Redimensionado auto.)</span>
+                `;
+                lucide.createIcons();
+
+                showToast("Item cadastrado com sucesso!");
                 showTab('dashboard');
             } catch(e) { 
                 console.error(e);
-                alert("Erro ao gravar."); 
+                showToast("Erro ao gravar novo item.", "error"); 
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
         };
 
         window.deleteMaterial = async (id, name) => {
             if(!currentUser) return;
-            const confirmed = window.confirm(`Excluir permanentemente "${name}"?`);
+            const confirmed = window.confirm(`ATENÇÃO: Deseja excluir permanentemente "${name}" e todo seu histórico de contagem?`);
             if(confirmed) {
                 try {
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id));
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
-                        item: name, action: 'Exclusão', qty: 0, detail: 'Removido', date: new Date().toLocaleString('pt-PT'), timestamp: serverTimestamp()
+                    addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
+                        item: name, action: 'Exclusão', qty: 0, detail: 'Removido do sistema', date: new Date().toLocaleString('pt-BR'), timestamp: serverTimestamp()
                     });
-                } catch(e) { alert("Erro ao excluir."); }
+                    showToast("Item excluído.");
+                } catch(e) { showToast("Erro ao excluir.", "error"); }
             }
         };
 
         window.handleTransaction = async () => {
+            const btn = document.getElementById('btn-confirm-trans');
+            if(btn) btn.disabled = true;
+
             const id = document.getElementById('trans-item').value;
             const qty = parseInt(document.getElementById('trans-qty').value);
             const reason = document.getElementById('trans-reason').value;
-            if(!id || isNaN(qty) || qty <= 0 || !currentUser) return;
+            
+            if(!id) { showToast("Selecione um item!", "error"); if(btn) btn.disabled = false; return; }
+            if(isNaN(qty) || qty <= 0) { showToast("Quantidade inválida!", "error"); if(btn) btn.disabled = false; return; }
+            if(!currentUser) return;
 
             const item = currentInventory.find(i => i.id === id);
             const data = { ...item }; delete data.id;
 
-            if(currentTransactionType === 'in') data.stockPronto += qty;
+            const from = document.getElementById('trans-from').value;
+            const to = document.getElementById('trans-to').value;
+
+            if(currentTransactionType === 'in') {
+                data.stockPronto = (data.stockPronto || 0) + qty;
+            } 
             else if(currentTransactionType === 'out') {
-                if(data.stockPronto < qty) return alert("Pronto Uso insuficiente!");
-                data.stockPronto -= qty;
-            } else {
-                const from = document.getElementById('trans-from').value;
-                const to = document.getElementById('trans-to').value;
-                if(from === to) return alert("Origem e Destino iguais.");
-                if(data[from] < qty) return alert("Saldo insuficiente na origem!");
+                if((data[from] || 0) < qty) {
+                    showToast("Saldo insuficiente na origem selecionada!", "error");
+                    if(btn) btn.disabled = false;
+                    return;
+                }
                 data[from] -= qty;
-                data[to] += qty;
+            } 
+            else if (currentTransactionType === 'transfer') {
+                if(from === to) { showToast("Origem e Destino são iguais.", "info"); if(btn) btn.disabled = false; return; }
+                if((data[from] || 0) < qty) {
+                    showToast("Saldo insuficiente para transferência!", "error");
+                    if(btn) btn.disabled = false;
+                    return;
+                }
+                data[from] -= qty;
+                data[to] = (data[to] || 0) + qty;
             }
 
             try {
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), data);
+                
+                let actionLabel = 'Transferência';
+                if(currentTransactionType === 'in') actionLabel = 'Entrada';
+                if(currentTransactionType === 'out') actionLabel = 'Saída';
+
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
                     item: item.name, 
-                    action: currentTransactionType === 'in' ? 'Entrada' : (currentTransactionType === 'out' ? 'Saída' : 'Transferência'),
-                    qty, detail: reason, date: new Date().toLocaleString('pt-PT'), timestamp: serverTimestamp()
+                    action: actionLabel,
+                    qty, 
+                    detail: reason || (currentTransactionType === 'transfer' ? `${from} -> ${to}` : ''), 
+                    date: new Date().toLocaleString('pt-BR'), 
+                    timestamp: serverTimestamp()
                 });
+
+                showToast("Movimentação registrada!");
+                document.getElementById('trans-qty').value = '';
+                document.getElementById('trans-reason').value = '';
                 showTab('dashboard');
-            } catch(e) { alert("Erro ao atualizar."); }
+            } catch(e) { 
+                console.error(e);
+                showToast("Erro ao processar.", "error"); 
+            } finally {
+                if(btn) btn.disabled = false;
+            }
         };
 
         window.showTab = (id) => {
@@ -530,6 +824,15 @@
             if(target) target.classList.add('active');
             const btn = document.getElementById(`btn-${id}`);
             if(btn) btn.classList.add('active');
+            
+            const titles = {
+                'dashboard': 'Visão Geral',
+                'movements': 'Movimentação de Estoque',
+                'new': 'Cadastro de Material',
+                'history': 'Histórico de Operações'
+            };
+            document.getElementById('page-title').innerText = titles[id] || 'Gestão';
+            
             lucide.createIcons();
         };
 
@@ -538,5 +841,3 @@
     </script>
 </body>
 </html>
-
-
