@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CONTROLE DE ESTOQUE - SCM</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
@@ -30,10 +28,8 @@
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col md:flex-row text-slate-800">
 
-    <!-- Container de Notificações -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
 
-    <!-- Sidebar -->
     <aside class="w-full md:w-64 bg-slate-900 text-slate-400 flex flex-col shadow-2xl z-20">
         <div class="p-6 border-b border-slate-800 flex items-center gap-3">
             <i data-lucide="package-search" class="text-blue-500"></i>
@@ -58,18 +54,14 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="flex-1 p-4 md:p-8 overflow-y-auto relative h-screen">
         <header class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8 sticky top-0 bg-slate-50/90 backdrop-blur-sm z-10 py-2">
             <h2 id="page-title" class="text-2xl font-black text-slate-800 uppercase tracking-tight">Visão Geral</h2>
-            
             <div class="flex flex-wrap items-center gap-3">
-                <!-- Filtros de Busca -->
                 <div class="relative group">
                     <i data-lucide="search" size="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors"></i>
                     <input type="text" id="search-input" placeholder="Buscar por nome, status ou classe..." oninput="handleFilter()" class="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-full text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-full md:w-64 transition-all shadow-sm">
                 </div>
-
                 <div class="flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-slate-200 shadow-sm">
                     <div id="connection-status-dot" class="status-dot bg-slate-300"></div>
                     <span id="connection-status-text" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Conectando...</span>
@@ -77,11 +69,8 @@
             </div>
         </header>
 
-        <!-- Dashboard -->
         <div id="dashboard" class="tab-content active space-y-6">
-            <!-- Grid de Cards (Agora com 6 cards) -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Card 1: Total Geral -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-purple-500 hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-start">
                         <div>
@@ -91,8 +80,6 @@
                         <div class="p-2 bg-purple-50 rounded-lg text-purple-600"><i data-lucide="layers" size="20"></i></div>
                     </div>
                 </div>
-
-                <!-- Card 2: Pronto Uso -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-emerald-500 hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-start">
                         <div>
@@ -102,8 +89,6 @@
                         <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600"><i data-lucide="package-check" size="20"></i></div>
                     </div>
                 </div>
-
-                <!-- Card 3: Classificação A -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-indigo-500 hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-start">
                         <div>
@@ -113,8 +98,6 @@
                         <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600"><i data-lucide="star" size="20"></i></div>
                     </div>
                 </div>
-
-                <!-- Card 4: Remanufatura -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-500 hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-start">
                         <div>
@@ -124,8 +107,6 @@
                         <div class="p-2 bg-blue-50 rounded-lg text-blue-600"><i data-lucide="wrench" size="20"></i></div>
                     </div>
                 </div>
-
-                <!-- Card 5: Retorno -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-amber-500 hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-start">
                         <div>
@@ -135,8 +116,6 @@
                         <div class="p-2 bg-amber-50 rounded-lg text-amber-600"><i data-lucide="truck" size="20"></i></div>
                     </div>
                 </div>
-
-                <!-- Card 6: Alerta -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-red-500 hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-start">
                         <div>
@@ -174,7 +153,6 @@
             </div>
         </div>
 
-        <!-- Movimentação -->
         <div id="movements" class="tab-content max-w-2xl mx-auto space-y-6 animate-fade-in">
             <div class="bg-white p-6 md:p-8 rounded-xl border border-slate-200 shadow-sm">
                 <h3 class="text-lg font-bold text-slate-700 mb-6 border-b pb-2">Registrar Movimentação</h3>
@@ -184,7 +162,7 @@
                     <select id="trans-item" class="p-3 border-2 border-slate-100 rounded-lg bg-slate-50 font-bold outline-none focus:border-blue-500 focus:bg-white transition-all w-full">
                         <option value="">Aguardando itens...</option>
                     </select>
-                    
+                  
                     <div class="flex flex-wrap gap-2 p-1 bg-slate-100 rounded-xl mt-2">
                         <button onclick="setTransType('in')" id="type-in" class="type-btn flex-1 py-3 px-2 rounded-lg font-black text-xs transition-all bg-white text-emerald-600 shadow-md uppercase">Entrada</button>
                         <button onclick="setTransType('out')" id="type-out" class="type-btn flex-1 py-3 px-2 rounded-lg font-black text-xs transition-all text-slate-500 uppercase">Saída</button>
@@ -192,16 +170,16 @@
                     </div>
                 </div>
 
-                <div id="dynamic-locations" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 hidden">
+                <div id="dynamic-locations" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div id="container-origin">
-                        <label class="text-[10px] uppercase font-bold text-slate-400">Origem</label>
+                        <label id="label-origin" class="text-[10px] uppercase font-bold text-slate-400">Local / Origem</label>
                         <select id="trans-from" class="w-full p-3 border rounded-lg text-sm bg-slate-50 focus:border-blue-500 outline-none">
                             <option value="stockPronto">Pronto Uso</option>
                             <option value="stockReman">Remanufatura</option>
                             <option value="stockRetorno">Retorno</option>
                         </select>
                     </div>
-                    <div id="container-destination">
+                    <div id="container-destination" class="hidden">
                         <label class="text-[10px] uppercase font-bold text-slate-400">Destino</label>
                         <select id="trans-to" class="w-full p-3 border rounded-lg text-sm bg-slate-50 focus:border-blue-500 outline-none">
                             <option value="stockPronto">Pronto Uso</option>
@@ -228,11 +206,9 @@
             </div>
         </div>
 
-        <!-- Novo Equipamento -->
         <div id="new" class="tab-content max-w-lg mx-auto">
             <div class="bg-white p-8 rounded-xl border border-slate-200 shadow-sm space-y-6">
                 <h3 class="text-lg font-bold text-slate-700 mb-2 border-b pb-2">Cadastrar Novo Item</h3>
-                
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-slate-400 uppercase">Imagem do Item</label>
                     <label class="block w-full p-4 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all text-center group relative overflow-hidden bg-slate-50">
@@ -243,12 +219,10 @@
                         </div>
                     </label>
                 </div>
-
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-slate-400 uppercase">Descrição do Equipamento</label>
                     <input type="text" id="new-name" placeholder="Ex: Suntech ST310U" class="w-full p-4 border-2 border-slate-100 rounded-xl outline-none font-bold focus:border-blue-500">
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="text-xs font-bold text-slate-400 uppercase">Tipo de Material</label>
@@ -269,7 +243,6 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="text-[10px] font-bold text-slate-400 uppercase">Estoque Mínimo</label>
@@ -284,7 +257,6 @@
             </div>
         </div>
 
-        <!-- Histórico -->
         <div id="history" class="tab-content">
             <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xl">
                 <div class="overflow-x-auto">
@@ -307,7 +279,6 @@
         </div>
     </main>
 
-    <!-- Modal de Edição -->
     <div id="edit-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
             <div class="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
@@ -370,13 +341,12 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+        const firebaseConfig = {
             apiKey: "AIzaSyATO-PdFidpnuPrPMq36oKTDFlpSxbsxDA", 
             authDomain: "meuestoquerastreadores.firebaseapp.com",
             projectId: "meuestoquerastreadores",
@@ -388,7 +358,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'rastreadores-main-db';
+        const appId = 'rastreadores-main-db';
 
         let currentInventory = [];
         let filteredInventory = [];
@@ -421,11 +391,7 @@
                 updateStatus("Sincronizado", "bg-emerald-500");
                 startListening();
             } else {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                await signInAnonymously(auth);
             }
         });
 
@@ -433,11 +399,10 @@
             const invRef = collection(db, 'artifacts', appId, 'public', 'data', 'inventory');
             onSnapshot(invRef, (snap) => {
                 currentInventory = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                handleFilter(); // Inicializa com a lista filtrada (ou cheia)
+                handleFilter();
                 updateSelects();
                 updateStats();
             });
-
             const histRef = collection(db, 'artifacts', appId, 'public', 'data', 'history');
             onSnapshot(histRef, (snap) => {
                 const logs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
@@ -446,34 +411,27 @@
             });
         }
 
-        // --- FILTRAGEM ---
         window.handleFilter = () => {
             const term = document.getElementById('search-input').value.toLowerCase().trim();
-            
             filteredInventory = currentInventory.filter(item => {
                 const total = (item.stockPronto || 0) + (item.stockReman || 0) + (item.stockRetorno || 0);
                 const min = item.minStock || 0;
                 const max = item.maxStock || 0;
-                const classification = item.classification || 'C'; // Default to C if undefined
+                const classification = item.classification || 'C';
                 
-                let statusText = "";
-                if (total < min) statusText = "baixo";
-                else if (total > max) statusText = "excesso";
-                else statusText = "em controle";
+                let statusText = (total < min) ? "baixo" : (total > max ? "excesso" : "em controle");
 
                 return item.name.toLowerCase().includes(term) || 
                        statusText.includes(term) ||
                        (item.type && item.type.toLowerCase().includes(term)) ||
                        classification.toLowerCase().includes(term);
             });
-
             renderInventory();
         };
 
         function renderInventory() {
             const body = document.getElementById('inventory-table-body');
             if(!body) return;
-            
             body.innerHTML = filteredInventory.length === 0 ? 
                 `<tr><td colspan="11" class="p-10 text-center text-slate-400">Nenhum item corresponde à sua busca.</td></tr>` :
                 filteredInventory.map(item => {
@@ -485,29 +443,11 @@
                     const max = item.maxStock || 100;
                     const classification = item.classification || 'C';
 
-                    let statusLabel = "";
-                    let statusClasses = "";
+                    let statusLabel = (total < min) ? "Baixo" : (total > max ? "Excesso" : "Em Controle");
+                    let statusClasses = (total < min) ? "bg-red-100 text-red-700 border-red-200" : (total > max ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-blue-100 text-blue-700 border-blue-200");
 
-                    if (total < min) {
-                        statusLabel = "Baixo";
-                        statusClasses = "bg-red-100 text-red-700 border-red-200";
-                    } else if (total > max) {
-                        statusLabel = "Excesso";
-                        statusClasses = "bg-emerald-100 text-emerald-700 border-emerald-200";
-                    } else {
-                        statusLabel = "Em Controle";
-                        statusClasses = "bg-blue-100 text-blue-700 border-blue-200";
-                    }
-
-                    // Cores da Classificação
-                    const classColors = {
-                        'A': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-                        'B': 'bg-blue-100 text-blue-700 border-blue-200',
-                        'C': 'bg-yellow-100 text-yellow-700 border-yellow-200',
-                        'D': 'bg-slate-100 text-slate-600 border-slate-200'
-                    };
+                    const classColors = { 'A': 'bg-emerald-100 text-emerald-700 border-emerald-200', 'B': 'bg-blue-100 text-blue-700 border-blue-200', 'C': 'bg-yellow-100 text-yellow-700 border-yellow-200', 'D': 'bg-slate-100 text-slate-600 border-slate-200' };
                     const classBadge = classColors[classification] || classColors['C'];
-
                     const typeColors = { 'Insumo': "bg-slate-100 text-slate-600 border-slate-200", 'Ferramenta': "bg-orange-50 text-orange-600 border-orange-100", 'Locação': "bg-purple-50 text-purple-600 border-purple-100", 'Cartão': "bg-pink-50 text-pink-600 border-pink-100" };
                     const typeClass = typeColors[item.type] || "bg-slate-100 text-slate-600";
 
@@ -515,8 +455,7 @@
                         ? `<div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center mx-auto"><img src="${item.imageUrl}" class="w-full h-full object-cover"></div>`
                         : `<div class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300 mx-auto"><i data-lucide="package" size="18"></i></div>`;
 
-                    return `
-                        <tr class="hover:bg-slate-50 border-b border-slate-50 transition-colors">
+                    return `<tr class="hover:bg-slate-50 border-b border-slate-50 transition-colors">
                             <td class="p-3">${imgHtml}</td>
                             <td class="p-4 text-center">
                                 <span class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs border ${classBadge} mx-auto shadow-sm">${classification}</span>
@@ -561,26 +500,16 @@
         }
 
         function updateStats() {
-            // Cálculos existentes
             const reman = currentInventory.reduce((a,c) => a + (c.stockReman || 0), 0);
             const retorno = currentInventory.reduce((a,c) => a + (c.stockRetorno || 0), 0);
-            const alertas = currentInventory.filter(i => {
-                const total = (i.stockPronto || 0) + (i.stockReman || 0) + (i.stockRetorno || 0);
-                return total < (i.minStock || 0);
-            }).length;
-
-            // Novos Cálculos
+            const alertas = currentInventory.filter(i => ((i.stockPronto || 0) + (i.stockReman || 0) + (i.stockRetorno || 0)) < (i.minStock || 0)).length;
             const totalGeral = currentInventory.reduce((a,c) => a + (c.stockPronto || 0) + (c.stockReman || 0) + (c.stockRetorno || 0), 0);
             const pronto = currentInventory.reduce((a,c) => a + (c.stockPronto || 0), 0);
-            const classA = currentInventory
-                .filter(i => i.classification === 'A')
-                .reduce((a,c) => a + (c.stockPronto || 0) + (c.stockReman || 0) + (c.stockRetorno || 0), 0);
-
-            // Atualiza UI
+            const classA = currentInventory.filter(i => i.classification === 'A').reduce((a,c) => a + (c.stockPronto || 0) + (c.stockReman || 0) + (c.stockRetorno || 0), 0);
+            
             document.getElementById('stat-reman').innerText = reman;
             document.getElementById('stat-retorno').innerText = retorno;
             document.getElementById('stat-alerta').innerText = alertas;
-            
             document.getElementById('stat-total').innerText = totalGeral;
             document.getElementById('stat-pronto').innerText = pronto;
             document.getElementById('stat-class-a').innerText = classA;
@@ -627,7 +556,7 @@
             if(item && item.imageUrl) imgContainer.innerHTML = `<img src="${item.imageUrl}" class="w-full h-full object-cover">`;
             else { imgContainer.innerHTML = `<i data-lucide="image" class="text-slate-300"></i>`; lucide.createIcons(); }
             document.getElementById('edit-type').value = type || 'Insumo';
-            document.getElementById('edit-classification').value = classification || 'C'; // Default to C
+            document.getElementById('edit-classification').value = classification || 'C';
             document.getElementById('edit-modal').classList.remove('hidden');
         };
 
@@ -637,19 +566,14 @@
             const id = document.getElementById('edit-id').value;
             const fileInput = document.getElementById('edit-image-file');
             try {
-                let data = { 
-                    name: document.getElementById('edit-name').value, 
-                    minStock: parseInt(document.getElementById('edit-min').value), 
-                    maxStock: parseInt(document.getElementById('edit-max').value), 
-                    type: document.getElementById('edit-type').value,
-                    classification: document.getElementById('edit-classification').value
-                };
+                let data = { name: document.getElementById('edit-name').value, minStock: parseInt(document.getElementById('edit-min').value), maxStock: parseInt(document.getElementById('edit-max').value), type: document.getElementById('edit-type').value, classification: document.getElementById('edit-classification').value };
                 if(fileInput.files.length > 0) data.imageUrl = await compressImage(fileInput.files[0]);
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), data);
                 showToast("Item atualizado!"); closeEditModal();
             } catch(e) { showToast("Erro ao editar.", "error"); }
         };
 
+        // --- ATUALIZAÇÃO DA LÓGICA DE TRANSAÇÃO ---
         window.setTransType = (type) => {
             currentTransactionType = type;
             document.querySelectorAll('.type-btn').forEach(b => {
@@ -658,8 +582,48 @@
             });
             const colors = { in: 'text-emerald-600', out: 'text-red-600', transfer: 'text-blue-600' };
             document.getElementById(`type-${type}`).classList.add('bg-white', 'shadow-md', colors[type]);
-            document.getElementById('dynamic-locations').classList.toggle('hidden', type === 'in');
-            document.getElementById('container-destination').classList.toggle('hidden', type === 'out');
+            
+            // Exibe a origem sempre. Exibe o destino apenas em Transferência.
+            document.getElementById('container-origin').classList.remove('hidden');
+            document.getElementById('container-destination').classList.toggle('hidden', type !== 'transfer');
+            
+            // Muda o label para ficar mais claro
+            document.getElementById('label-origin').innerText = type === 'in' ? 'Local de Entrada' : 'Local de Saída / Origem';
+        };
+
+        window.handleTransaction = async () => {
+            const id = document.getElementById('trans-item').value;
+            const qty = parseInt(document.getElementById('trans-qty').value);
+            const from = document.getElementById('trans-from').value;
+            const to = document.getElementById('trans-to').value;
+
+            if(!id || isNaN(qty) || qty <= 0) return showToast("Dados inválidos", "error");
+            
+            const item = currentInventory.find(i => i.id === id);
+            const data = { ...item }; delete data.id;
+
+            if(currentTransactionType === 'in') {
+                // Adiciona no local escolhido no select de "Origem"
+                data[from] = (data[from] || 0) + qty;
+            } else {
+                if((data[from] || 0) < qty) return showToast("Saldo insuficiente no local!", "error");
+                data[from] -= qty;
+                if(currentTransactionType === 'transfer') data[to] = (data[to] || 0) + qty;
+            }
+
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), data);
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
+                    item: item.name, 
+                    action: currentTransactionType === 'in' ? 'Entrada' : (currentTransactionType === 'out' ? 'Saída' : 'Transferência'),
+                    qty, detail: document.getElementById('trans-reason').value || '', 
+                    date: new Date().toLocaleString('pt-BR'), timestamp: serverTimestamp()
+                });
+                showToast("Sucesso!"); showTab('dashboard');
+                // Limpa campos
+                document.getElementById('trans-qty').value = "";
+                document.getElementById('trans-reason').value = "";
+            } catch(e) { showToast("Erro ao processar.", "error"); }
         };
 
         window.addNewItem = async () => {
@@ -669,11 +633,8 @@
             try {
                 let imageUrl = fileInput.files.length > 0 ? await compressImage(fileInput.files[0]) : "";
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'inventory'), {
-                    name, 
-                    minStock: parseInt(document.getElementById('new-min').value) || 0, 
-                    maxStock: parseInt(document.getElementById('new-max').value) || 0,
-                    type: document.getElementById('new-type').value, 
-                    classification: document.getElementById('new-classification').value,
+                    name, minStock: parseInt(document.getElementById('new-min').value) || 0, maxStock: parseInt(document.getElementById('new-max').value) || 0,
+                    type: document.getElementById('new-type').value, classification: document.getElementById('new-classification').value,
                     imageUrl, stockPronto: 0, stockReman: 0, stockRetorno: 0, timestamp: serverTimestamp()
                 });
                 showToast("Item cadastrado!"); showTab('dashboard');
@@ -685,33 +646,6 @@
                 try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id)); showToast("Excluído."); }
                 catch(e) { showToast("Erro ao excluir.", "error"); }
             }
-        };
-
-        window.handleTransaction = async () => {
-            const id = document.getElementById('trans-item').value;
-            const qty = parseInt(document.getElementById('trans-qty').value);
-            if(!id || isNaN(qty) || qty <= 0) return showToast("Dados inválidos", "error");
-
-            const item = currentInventory.find(i => i.id === id);
-            const data = { ...item }; delete data.id;
-            const from = document.getElementById('trans-from').value;
-            const to = document.getElementById('trans-to').value;
-
-            if(currentTransactionType === 'in') data.stockPronto = (data.stockPronto || 0) + qty;
-            else {
-                if((data[from] || 0) < qty) return showToast("Saldo insuficiente!", "error");
-                data[from] -= qty;
-                if(currentTransactionType === 'transfer') data[to] = (data[to] || 0) + qty;
-            }
-
-            try {
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), data);
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
-                    item: item.name, action: currentTransactionType === 'in' ? 'Entrada' : (currentTransactionType === 'out' ? 'Saída' : 'Transferência'),
-                    qty, detail: document.getElementById('trans-reason').value || '', date: new Date().toLocaleString('pt-BR'), timestamp: serverTimestamp()
-                });
-                showToast("Sucesso!"); showTab('dashboard');
-            } catch(e) { showToast("Erro ao processar.", "error"); }
         };
 
         window.showTab = (id) => {
