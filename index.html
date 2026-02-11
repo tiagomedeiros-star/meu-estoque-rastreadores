@@ -67,7 +67,7 @@
                 <!-- Filtros de Busca -->
                 <div class="relative group">
                     <i data-lucide="search" size="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors"></i>
-                    <input type="text" id="search-input" placeholder="Buscar por nome ou status..." oninput="handleFilter()" class="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-full text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-full md:w-64 transition-all shadow-sm">
+                    <input type="text" id="search-input" placeholder="Buscar por nome, status ou classe..." oninput="handleFilter()" class="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-full text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-full md:w-64 transition-all shadow-sm">
                 </div>
 
                 <div class="flex items-center gap-2 px-3 py-1 bg-white rounded-full border border-slate-200 shadow-sm">
@@ -79,18 +79,72 @@
 
         <!-- Dashboard -->
         <div id="dashboard" class="tab-content active space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Grid de Cards (Agora com 6 cards) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Card 1: Total Geral -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-purple-500 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Total Geral</p>
+                            <h3 id="stat-total" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+                        </div>
+                        <div class="p-2 bg-purple-50 rounded-lg text-purple-600"><i data-lucide="layers" size="20"></i></div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Pronto Uso -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-emerald-500 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Pronto Uso</p>
+                            <h3 id="stat-pronto" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+                        </div>
+                        <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600"><i data-lucide="package-check" size="20"></i></div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Classificação A -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-indigo-500 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Estoque Classe A</p>
+                            <h3 id="stat-class-a" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+                        </div>
+                        <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600"><i data-lucide="star" size="20"></i></div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Remanufatura -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-500 hover:shadow-md transition-shadow">
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Em Remanufatura</p>
-                    <h3 id="stat-reman" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Em Remanufatura</p>
+                            <h3 id="stat-reman" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+                        </div>
+                        <div class="p-2 bg-blue-50 rounded-lg text-blue-600"><i data-lucide="wrench" size="20"></i></div>
+                    </div>
                 </div>
+
+                <!-- Card 5: Retorno -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-amber-500 hover:shadow-md transition-shadow">
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Em Retorno</p>
-                    <h3 id="stat-retorno" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Em Retorno</p>
+                            <h3 id="stat-retorno" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+                        </div>
+                        <div class="p-2 bg-amber-50 rounded-lg text-amber-600"><i data-lucide="truck" size="20"></i></div>
+                    </div>
                 </div>
+
+                <!-- Card 6: Alerta -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-red-500 hover:shadow-md transition-shadow">
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Abaixo do Mínimo</p>
-                    <h3 id="stat-alerta" class="text-3xl font-black text-red-600 mt-1">0</h3>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Abaixo do Mínimo</p>
+                            <h3 id="stat-alerta" class="text-3xl font-black text-red-600 mt-1">0</h3>
+                        </div>
+                        <div class="p-2 bg-red-50 rounded-lg text-red-600"><i data-lucide="alert-triangle" size="20"></i></div>
+                    </div>
                 </div>
             </div>
 
@@ -99,7 +153,8 @@
                     <table class="w-full text-left text-sm whitespace-nowrap">
                         <thead class="bg-slate-50 border-b border-slate-200">
                             <tr>
-                                <th class="p-4 font-bold text-slate-600 w-20 text-center">Img</th>
+                                <th class="p-4 font-bold text-slate-600 w-16 text-center">Img</th>
+                                <th class="p-4 font-bold text-slate-600 w-16 text-center">Class</th>
                                 <th class="p-4 font-bold text-slate-600">Material</th>
                                 <th class="p-4 text-center text-slate-600">Tipo</th>
                                 <th class="p-4 text-center text-slate-600">Status</th>
@@ -112,7 +167,7 @@
                             </tr>
                         </thead>
                         <tbody id="inventory-table-body" class="divide-y divide-slate-100">
-                            <tr><td colspan="10" class="p-10 text-center text-slate-400 italic">Sincronizando dados...</td></tr>
+                            <tr><td colspan="11" class="p-10 text-center text-slate-400 italic">Sincronizando dados...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -194,14 +249,25 @@
                     <input type="text" id="new-name" placeholder="Ex: Suntech ST310U" class="w-full p-4 border-2 border-slate-100 rounded-xl outline-none font-bold focus:border-blue-500">
                 </div>
                 
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-400 uppercase">Tipo de Material</label>
-                    <select id="new-type" class="w-full p-4 border-2 border-slate-100 rounded-xl outline-none font-bold focus:border-blue-500 bg-white">
-                        <option value="Insumo">Insumo</option>
-                        <option value="Ferramenta">Ferramenta</option>
-                        <option value="Locação">Locação</option>
-                        <option value="Cartão">Cartão</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase">Tipo de Material</label>
+                        <select id="new-type" class="w-full p-4 border-2 border-slate-100 rounded-xl outline-none font-bold focus:border-blue-500 bg-white">
+                            <option value="Insumo">Insumo</option>
+                            <option value="Ferramenta">Ferramenta</option>
+                            <option value="Locação">Locação</option>
+                            <option value="Cartão">Cartão</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase">Classificação</label>
+                        <select id="new-classification" class="w-full p-4 border-2 border-slate-100 rounded-xl outline-none font-bold focus:border-blue-500 bg-white">
+                            <option value="A">Classe A</option>
+                            <option value="B">Classe B</option>
+                            <option value="C">Classe C</option>
+                            <option value="D">Classe D</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -266,14 +332,25 @@
                     <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Nome</label>
                     <input id="edit-name" type="text" class="w-full p-3 border-2 border-slate-100 rounded-lg font-bold outline-none focus:border-blue-500">
                 </div>
-                <div>
-                    <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Tipo de Material</label>
-                    <select id="edit-type" class="w-full p-3 border-2 border-slate-100 rounded-lg font-bold outline-none focus:border-blue-500 bg-white">
-                        <option value="Insumo">Insumo</option>
-                        <option value="Ferramenta">Ferramenta</option>
-                        <option value="Locação">Locação</option>
-                        <option value="Cartão">Cartão</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Tipo de Material</label>
+                        <select id="edit-type" class="w-full p-3 border-2 border-slate-100 rounded-lg font-bold outline-none focus:border-blue-500 bg-white">
+                            <option value="Insumo">Insumo</option>
+                            <option value="Ferramenta">Ferramenta</option>
+                            <option value="Locação">Locação</option>
+                            <option value="Cartão">Cartão</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-slate-400 ml-1">Classificação</label>
+                        <select id="edit-classification" class="w-full p-3 border-2 border-slate-100 rounded-lg font-bold outline-none focus:border-blue-500 bg-white">
+                            <option value="A">Classe A</option>
+                            <option value="B">Classe B</option>
+                            <option value="C">Classe C</option>
+                            <option value="D">Classe D</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -377,8 +454,8 @@
                 const total = (item.stockPronto || 0) + (item.stockReman || 0) + (item.stockRetorno || 0);
                 const min = item.minStock || 0;
                 const max = item.maxStock || 0;
+                const classification = item.classification || 'C'; // Default to C if undefined
                 
-                // Determina o texto do status para busca
                 let statusText = "";
                 if (total < min) statusText = "baixo";
                 else if (total > max) statusText = "excesso";
@@ -386,7 +463,8 @@
 
                 return item.name.toLowerCase().includes(term) || 
                        statusText.includes(term) ||
-                       (item.type && item.type.toLowerCase().includes(term));
+                       (item.type && item.type.toLowerCase().includes(term)) ||
+                       classification.toLowerCase().includes(term);
             });
 
             renderInventory();
@@ -397,7 +475,7 @@
             if(!body) return;
             
             body.innerHTML = filteredInventory.length === 0 ? 
-                `<tr><td colspan="10" class="p-10 text-center text-slate-400">Nenhum item corresponde à sua busca.</td></tr>` :
+                `<tr><td colspan="11" class="p-10 text-center text-slate-400">Nenhum item corresponde à sua busca.</td></tr>` :
                 filteredInventory.map(item => {
                     const pronto = item.stockPronto || 0;
                     const reman = item.stockReman || 0;
@@ -405,6 +483,7 @@
                     const total = pronto + reman + retorno;
                     const min = item.minStock || 0;
                     const max = item.maxStock || 100;
+                    const classification = item.classification || 'C';
 
                     let statusLabel = "";
                     let statusClasses = "";
@@ -416,10 +495,18 @@
                         statusLabel = "Excesso";
                         statusClasses = "bg-emerald-100 text-emerald-700 border-emerald-200";
                     } else {
-                        // NOVO STATUS: EM CONTROLE (AZUL)
                         statusLabel = "Em Controle";
                         statusClasses = "bg-blue-100 text-blue-700 border-blue-200";
                     }
+
+                    // Cores da Classificação
+                    const classColors = {
+                        'A': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                        'B': 'bg-blue-100 text-blue-700 border-blue-200',
+                        'C': 'bg-yellow-100 text-yellow-700 border-yellow-200',
+                        'D': 'bg-slate-100 text-slate-600 border-slate-200'
+                    };
+                    const classBadge = classColors[classification] || classColors['C'];
 
                     const typeColors = { 'Insumo': "bg-slate-100 text-slate-600 border-slate-200", 'Ferramenta': "bg-orange-50 text-orange-600 border-orange-100", 'Locação': "bg-purple-50 text-purple-600 border-purple-100", 'Cartão': "bg-pink-50 text-pink-600 border-pink-100" };
                     const typeClass = typeColors[item.type] || "bg-slate-100 text-slate-600";
@@ -431,6 +518,9 @@
                     return `
                         <tr class="hover:bg-slate-50 border-b border-slate-50 transition-colors">
                             <td class="p-3">${imgHtml}</td>
+                            <td class="p-4 text-center">
+                                <span class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs border ${classBadge} mx-auto shadow-sm">${classification}</span>
+                            </td>
                             <td class="p-4 font-bold text-slate-700">${item.name}</td>
                             <td class="p-4 text-center"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase border ${typeClass}">${item.type}</span></td>
                             <td class="p-4 text-center"><span class="px-2 py-1 rounded-full text-[10px] font-black uppercase border ${statusClasses}">${statusLabel}</span></td>
@@ -440,7 +530,7 @@
                             <td class="p-4 text-center font-bold text-amber-500 bg-amber-50/30">${retorno}</td>
                             <td class="p-4 text-center text-slate-400 text-[10px] font-mono">${min} - ${max}</td>
                             <td class="p-4 text-center flex items-center justify-center gap-2">
-                                <button onclick="openEditModal('${item.id}', '${item.name}', ${min}, ${item.maxStock || 0}, '${item.type}')" class="text-slate-400 hover:text-blue-600 p-2 rounded-lg transition-colors"><i data-lucide="pencil" size="16"></i></button>
+                                <button onclick="openEditModal('${item.id}', '${item.name}', ${min}, ${item.maxStock || 0}, '${item.type}', '${classification}')" class="text-slate-400 hover:text-blue-600 p-2 rounded-lg transition-colors"><i data-lucide="pencil" size="16"></i></button>
                                 <button onclick="deleteMaterial('${item.id}', '${item.name}')" class="text-slate-400 hover:text-red-600 p-2 rounded-lg transition-colors"><i data-lucide="trash-2" size="16"></i></button>
                             </td>
                         </tr>`;
@@ -471,15 +561,29 @@
         }
 
         function updateStats() {
+            // Cálculos existentes
             const reman = currentInventory.reduce((a,c) => a + (c.stockReman || 0), 0);
             const retorno = currentInventory.reduce((a,c) => a + (c.stockRetorno || 0), 0);
             const alertas = currentInventory.filter(i => {
                 const total = (i.stockPronto || 0) + (i.stockReman || 0) + (i.stockRetorno || 0);
                 return total < (i.minStock || 0);
             }).length;
+
+            // Novos Cálculos
+            const totalGeral = currentInventory.reduce((a,c) => a + (c.stockPronto || 0) + (c.stockReman || 0) + (c.stockRetorno || 0), 0);
+            const pronto = currentInventory.reduce((a,c) => a + (c.stockPronto || 0), 0);
+            const classA = currentInventory
+                .filter(i => i.classification === 'A')
+                .reduce((a,c) => a + (c.stockPronto || 0) + (c.stockReman || 0) + (c.stockRetorno || 0), 0);
+
+            // Atualiza UI
             document.getElementById('stat-reman').innerText = reman;
             document.getElementById('stat-retorno').innerText = retorno;
             document.getElementById('stat-alerta').innerText = alertas;
+            
+            document.getElementById('stat-total').innerText = totalGeral;
+            document.getElementById('stat-pronto').innerText = pronto;
+            document.getElementById('stat-class-a').innerText = classA;
         }
 
         window.compressImage = (file) => {
@@ -513,7 +617,7 @@
             }
         };
 
-        window.openEditModal = (id, name, min, max, type) => {
+        window.openEditModal = (id, name, min, max, type, classification) => {
             document.getElementById('edit-id').value = id;
             document.getElementById('edit-name').value = name;
             document.getElementById('edit-min').value = min;
@@ -523,6 +627,7 @@
             if(item && item.imageUrl) imgContainer.innerHTML = `<img src="${item.imageUrl}" class="w-full h-full object-cover">`;
             else { imgContainer.innerHTML = `<i data-lucide="image" class="text-slate-300"></i>`; lucide.createIcons(); }
             document.getElementById('edit-type').value = type || 'Insumo';
+            document.getElementById('edit-classification').value = classification || 'C'; // Default to C
             document.getElementById('edit-modal').classList.remove('hidden');
         };
 
@@ -532,7 +637,13 @@
             const id = document.getElementById('edit-id').value;
             const fileInput = document.getElementById('edit-image-file');
             try {
-                let data = { name: document.getElementById('edit-name').value, minStock: parseInt(document.getElementById('edit-min').value), maxStock: parseInt(document.getElementById('edit-max').value), type: document.getElementById('edit-type').value };
+                let data = { 
+                    name: document.getElementById('edit-name').value, 
+                    minStock: parseInt(document.getElementById('edit-min').value), 
+                    maxStock: parseInt(document.getElementById('edit-max').value), 
+                    type: document.getElementById('edit-type').value,
+                    classification: document.getElementById('edit-classification').value
+                };
                 if(fileInput.files.length > 0) data.imageUrl = await compressImage(fileInput.files[0]);
                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), data);
                 showToast("Item atualizado!"); closeEditModal();
@@ -558,8 +669,12 @@
             try {
                 let imageUrl = fileInput.files.length > 0 ? await compressImage(fileInput.files[0]) : "";
                 await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'inventory'), {
-                    name, minStock: parseInt(document.getElementById('new-min').value) || 0, maxStock: parseInt(document.getElementById('new-max').value) || 0,
-                    type: document.getElementById('new-type').value, imageUrl, stockPronto: 0, stockReman: 0, stockRetorno: 0, timestamp: serverTimestamp()
+                    name, 
+                    minStock: parseInt(document.getElementById('new-min').value) || 0, 
+                    maxStock: parseInt(document.getElementById('new-max').value) || 0,
+                    type: document.getElementById('new-type').value, 
+                    classification: document.getElementById('new-classification').value,
+                    imageUrl, stockPronto: 0, stockReman: 0, stockRetorno: 0, timestamp: serverTimestamp()
                 });
                 showToast("Item cadastrado!"); showTab('dashboard');
             } catch(e) { showToast("Erro ao gravar", "error"); }
