@@ -172,7 +172,7 @@
 
                 <div id="dynamic-locations" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div id="container-origin">
-                        <label id="label-origin" class="text-[10px] uppercase font-bold text-slate-400">Local / Origem</label>
+                        <label id="label-origin" class="text-[10px] uppercase font-bold text-slate-400">Origem</label>
                         <select id="trans-from" class="w-full p-3 border rounded-lg text-sm bg-slate-50 focus:border-blue-500 outline-none">
                             <option value="stockPronto">Pronto Uso</option>
                             <option value="stockReman">Remanufatura</option>
@@ -421,10 +421,15 @@
                 
                 let statusText = (total < min) ? "baixo" : (total > max ? "excesso" : "em controle");
 
+                // --- MODIFICAÇÃO: Busca Inteligente por Classificação ---
+                const termoClassificacao = `classe ${classification}`.toLowerCase();
+
                 return item.name.toLowerCase().includes(term) || 
                        statusText.includes(term) ||
                        (item.type && item.type.toLowerCase().includes(term)) ||
-                       classification.toLowerCase().includes(term);
+                       // Verifica se é a letra "A", "B"... ou o texto "Classe A"
+                       classification.toLowerCase() === term ||
+                       termoClassificacao.includes(term);
             });
             renderInventory();
         };
@@ -573,7 +578,6 @@
             } catch(e) { showToast("Erro ao editar.", "error"); }
         };
 
-        // --- ATUALIZAÇÃO DA LÓGICA DE TRANSAÇÃO ---
         window.setTransType = (type) => {
             currentTransactionType = type;
             document.querySelectorAll('.type-btn').forEach(b => {
@@ -583,12 +587,16 @@
             const colors = { in: 'text-emerald-600', out: 'text-red-600', transfer: 'text-blue-600' };
             document.getElementById(`type-${type}`).classList.add('bg-white', 'shadow-md', colors[type]);
             
-            // Exibe a origem sempre. Exibe o destino apenas em Transferência.
+            // --- MODIFICAÇÃO: Exibir Origem mesmo na Entrada ---
+            document.getElementById('dynamic-locations').classList.remove('hidden'); 
             document.getElementById('container-origin').classList.remove('hidden');
-            document.getElementById('container-destination').classList.toggle('hidden', type !== 'transfer');
             
-            // Muda o label para ficar mais claro
-            document.getElementById('label-origin').innerText = type === 'in' ? 'Local de Entrada' : 'Local de Saída / Origem';
+            // Destino apenas para transferência
+            document.getElementById('container-destination').classList.toggle('hidden', type !== 'transfer');
+
+            // Ajusta o label para ficar mais claro
+            const labelOrigin = document.querySelector('#container-origin label');
+            if(labelOrigin) labelOrigin.innerText = type === 'in' ? 'Local de Entrada' : 'Origem';
         };
 
         window.handleTransaction = async () => {
@@ -603,10 +611,10 @@
             const data = { ...item }; delete data.id;
 
             if(currentTransactionType === 'in') {
-                // Adiciona no local escolhido no select de "Origem"
+                // --- MODIFICAÇÃO: Adicionar no local selecionado ---
                 data[from] = (data[from] || 0) + qty;
             } else {
-                if((data[from] || 0) < qty) return showToast("Saldo insuficiente no local!", "error");
+                if((data[from] || 0) < qty) return showToast("Saldo insuficiente!", "error");
                 data[from] -= qty;
                 if(currentTransactionType === 'transfer') data[to] = (data[to] || 0) + qty;
             }
@@ -620,7 +628,6 @@
                     date: new Date().toLocaleString('pt-BR'), timestamp: serverTimestamp()
                 });
                 showToast("Sucesso!"); showTab('dashboard');
-                // Limpa campos
                 document.getElementById('trans-qty').value = "";
                 document.getElementById('trans-reason').value = "";
             } catch(e) { showToast("Erro ao processar.", "error"); }
